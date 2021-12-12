@@ -32,6 +32,7 @@ import com.google.accompanist.insets.navigationBarsWithImePadding
 import com.google.accompanist.insets.statusBarsPadding
 import ru.kode.base.internship.auth.ui.R
 import ru.kode.base.internship.core.domain.entity.LceState
+import ru.kode.base.internship.ui.component.Logo
 import ru.kode.base.internship.ui.component.TextField
 import ru.kode.base.internship.ui.core.uikit.KodeBankBaseController
 import ru.kode.base.internship.ui.core.uikit.component.ErrorSnackbar
@@ -68,10 +69,7 @@ internal class EnterPasswordController : KodeBankBaseController<ViewState, ViewI
         horizontalAlignment = Alignment.CenterHorizontally,
       ) {
         Spacer(modifier = Modifier.height(56.dp))
-        Image(
-          painter = painterResource(id = R.drawable.img_kode_logo_90x40),
-          contentDescription = "KODE logo"
-        )
+        Logo()
         Spacer(modifier = Modifier.weight(2f))
         val visualTransformation = if (state.isPasswordProtected) {
           PasswordVisualTransformation()
@@ -149,7 +147,7 @@ internal class EnterPasswordController : KodeBankBaseController<ViewState, ViewI
   private fun PasswordFieldTrailingIcon(
     isLoginInProgress: Boolean,
     isPasswordProtected: Boolean,
-    onTogglePasswordVisibility: () -> Unit
+    onTogglePasswordVisibility: () -> Unit,
   ) {
     if (isLoginInProgress) {
       CircularProgressIndicator(
@@ -178,7 +176,7 @@ internal class EnterPasswordController : KodeBankBaseController<ViewState, ViewI
 
 @Composable
 private fun ErrorMessage.name(): String {
-  return when(this) {
+  return when (this) {
     ErrorMessage.LoginError -> stringResource(id = R.string.error_something_went_wrong_title)
   }
 }

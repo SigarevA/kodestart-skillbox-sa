@@ -5,6 +5,7 @@ import ru.kode.base.core.routing.coordinator.FlowConstructor
 import ru.kode.base.core.routing.coordinator.FlowCoordinator
 import ru.kode.base.internship.auth.domain.di.AuthDataModule
 import ru.kode.base.internship.auth.domain.di.AuthDomainModule
+import ru.sigarev.products.di.ProductsFakeDomainModule
 
 interface AppFlow {
   companion object : FlowConstructor<Coordinator, Unit, Unit>(
@@ -14,6 +15,7 @@ interface AppFlow {
         AppFlowModule(),
         AuthDataModule(),
         AuthDomainModule(),
+        ProductsFakeDomainModule()
       ),
       coordinatorClass = Coordinator::class.java
     )

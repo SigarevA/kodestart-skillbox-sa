@@ -14,6 +14,7 @@ import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Icon
 import androidx.compose.material.SnackbarHost
 import androidx.compose.material.SnackbarHostState
+import androidx.compose.material.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
@@ -29,6 +30,7 @@ import com.google.accompanist.insets.navigationBarsWithImePadding
 import com.google.accompanist.insets.statusBarsPadding
 import ru.kode.base.internship.auth.ui.R
 import ru.kode.base.internship.core.domain.entity.LceState
+import ru.kode.base.internship.ui.component.Logo
 import ru.kode.base.internship.ui.component.TextField
 import ru.kode.base.internship.ui.core.uikit.KodeBankBaseController
 import ru.kode.base.internship.ui.core.uikit.component.ErrorSnackbar
@@ -61,10 +63,8 @@ internal class UserIdentificationController : KodeBankBaseController<ViewState, 
         horizontalAlignment = Alignment.CenterHorizontally,
       ) {
         Spacer(modifier = Modifier.height(56.dp))
-        Image(
-          painter = painterResource(id = R.drawable.img_kode_logo_90x40),
-          contentDescription = "KODE logo"
-        )
+        Logo()
+
         Spacer(modifier = Modifier.weight(2f))
         TextField(
           inputValue = state.enteredPhoneNumber,
@@ -141,7 +141,7 @@ internal class UserIdentificationController : KodeBankBaseController<ViewState, 
 
 @Composable
 private fun ErrorMessage.name(): String {
-  return when(this) {
+  return when (this) {
     ErrorMessage.ValidationError.IncorrectPhoneNumber -> stringResource(id = R.string.validation_error_incorrect_phone)
     ErrorMessage.IdentificationError -> stringResource(id = R.string.error_something_went_wrong_title)
   }
