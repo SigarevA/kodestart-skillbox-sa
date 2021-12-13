@@ -44,6 +44,7 @@ dependencies {
 
   implementation project(':products:domain')
   implementation project(':routing')
+  implementation 'com.valentinilk.shimmer:compose-shimmer:1.0.2'
 
   kapt Deps.toothpickProcessor
 }

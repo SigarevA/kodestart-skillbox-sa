@@ -10,6 +10,8 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.CircularProgressIndicator
@@ -17,15 +19,20 @@ import androidx.compose.material.Icon
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.google.accompanist.insets.navigationBarsWithImePadding
 import com.google.accompanist.insets.statusBarsPadding
+import com.valentinilk.shimmer.LocalShimmerTheme
+import com.valentinilk.shimmer.defaultShimmerTheme
+import com.valentinilk.shimmer.shimmer
 import ru.kode.base.internship.core.domain.entity.LceState
 import ru.kode.base.internship.ui.core.uikit.KodeBankBaseController
 import ru.kode.base.internship.ui.core.uikit.component.PrimaryButton
@@ -57,58 +64,87 @@ internal class ProductsMainController :
         .statusBarsPadding()
         .navigationBarsWithImePadding()
     ) {
-      LazyColumn {
-        item {
-          ScreenHeader()
-        }
-        if (state.bankAccountsLceState == LceState.Loading)
-          item { Loading() }
-        state.bankAccounts?.let { bankinfo ->
-          if (bankinfo.bankAccounts.isNotEmpty()) {
-            item {
-              HeaderBankAccounts()
-            }
-            bankinfo.bankAccounts.forEachIndexed { i, bankAccount ->
+      val yourShimmerTheme = defaultShimmerTheme.copy(
+        shaderColors = listOf(Color(0xFF403A47).copy(alpha = 0.5f),
+          Color.Unspecified.copy(alpha = 0.5f),
+          Color(0xFF403A47).copy(alpha = 0.5f))
+        //shaderColors = listOf(Color(0xFF403A47), Color(0xFF706D76), Color(0xFF403A47))
+      )
+      CompositionLocalProvider(
+        LocalShimmerTheme provides yourShimmerTheme
+      ) {
+        LazyColumn {
+          item {
+            ShimmerLoading()
+          }
+          item {
+            ScreenHeader()
+          }
+          if (state.bankAccountsLceState == LceState.Loading)
+            item { Loading() }
+          state.bankAccounts?.let { bankinfo ->
+            if (bankinfo.bankAccounts.isNotEmpty()) {
               item {
-                BankAccount(bankAccount = bankAccount, i)
+                HeaderBankAccounts()
               }
-              if (bankinfo.expandBankAccounts[i])
-                bankAccount.cards.forEach { card ->
-                  item {
-                    BankCard(Modifier, card)
-                  }
+              bankinfo.bankAccounts.forEachIndexed { i, bankAccount ->
+                item {
+                  BankAccount(bankAccount = bankAccount, i)
                 }
-            }
-          }
-        }
-        item {
-          Spacer(modifier = Modifier.height(11.dp))
-        }
-        if (state.depositsLceState == LceState.Loading)
-          item { Loading() }
-        state.deposits?.let {
-          if (it.isNotEmpty()) {
-            item {
-              BankDepositHeader()
-            }
-            it.forEachIndexed { i, deposit ->
-              item {
-                BankDeposit(deposit, i == it.size - 1 && i != 1)
+                if (bankinfo.expandBankAccounts[i])
+                  bankAccount.cards.forEach { card ->
+                    item {
+                      BankCard(Modifier, card)
+                    }
+                  }
               }
             }
           }
-        }
-        item {
-          PrimaryButton(
-            modifier = Modifier
-              .padding(16.dp)
-              .fillMaxWidth(),
-            text = stringResource(id = R.string.products_open_new_deposit_product),
-            onClick = {
+          item {
+            Spacer(modifier = Modifier.height(11.dp))
+          }
+          if (state.depositsLceState == LceState.Loading)
+            item { Loading() }
+          state.deposits?.let {
+            if (it.isNotEmpty()) {
+              item {
+                BankDepositHeader()
+              }
+              it.forEachIndexed { i, deposit ->
+                item {
+                  BankDeposit(deposit, i == it.size - 1 && i != 1)
+                }
+              }
             }
-          )
+          }
+          item {
+            PrimaryButton(
+              modifier = Modifier
+                .padding(16.dp)
+                .fillMaxWidth(),
+              text = stringResource(id = R.string.products_open_new_deposit_product),
+              onClick = {
+              }
+            )
+          }
         }
       }
+    }
+  }
+
+  @Composable
+  fun ShimmerLoading() {
+    Surface(
+      color = AppTheme.colors.contendTertiary,
+      shape = RoundedCornerShape(32.dp),
+      modifier = Modifier
+        .size(64.dp)
+        //.background(AppTheme.colors.backgroundSecondary)
+        .shimmer()
+    ) {
+      Spacer(modifier = Modifier
+        .width(32.dp)
+        .height(32.dp))
     }
   }
 
@@ -123,12 +159,15 @@ internal class ProductsMainController :
         .padding(16.dp),
         contentAlignment = Alignment.Center
       ) {
-        CircularProgressIndicator(
-          modifier = Modifier
-            .padding(end = 16.dp),
-          color = AppTheme.colors.contendAccentPrimary,
-          strokeWidth = 1.5.dp
-        )
+        Column {
+          CircularProgressIndicator(
+            modifier = Modifier
+              .padding(end = 16.dp),
+            color = AppTheme.colors.contendAccentPrimary,
+            strokeWidth = 1.5.dp
+          )
+        }
+        ShimmerLoading()
       }
     }
   }
