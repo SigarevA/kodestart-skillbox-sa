@@ -1,41 +1,57 @@
 package ru.sigarev.products.ui
 
+import androidx.compose.animation.animateColor
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.Button
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Icon
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.State
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.google.accompanist.insets.navigationBarsWithImePadding
 import com.google.accompanist.insets.statusBarsPadding
-import com.valentinilk.shimmer.LocalShimmerTheme
-import com.valentinilk.shimmer.defaultShimmerTheme
 import com.valentinilk.shimmer.shimmer
-import ru.kode.base.internship.core.domain.entity.LceState
 import ru.kode.base.internship.ui.core.uikit.KodeBankBaseController
-import ru.kode.base.internship.ui.core.uikit.component.PrimaryButton
 import ru.kode.base.internship.ui.core.uikit.theme.AppTheme
 import ru.sigarev.products.model.BankAccount
 import ru.sigarev.products.model.Card
@@ -58,6 +74,15 @@ internal class ProductsMainController :
   @ExperimentalComposeUiApi
   @Composable
   override fun ScreenContent(state: ProductsMainScreen.ViewState) {
+    Box(
+      contentAlignment = Alignment.TopCenter,
+      modifier = Modifier
+        .statusBarsPadding()
+        .navigationBarsWithImePadding()
+    ) {
+      ShimmerList()
+    }
+    /*
     Box(
       contentAlignment = Alignment.TopCenter,
       modifier = Modifier
@@ -130,6 +155,7 @@ internal class ProductsMainController :
         }
       }
     }
+    */
   }
 
   @Composable
@@ -364,5 +390,292 @@ internal class ProductsMainController :
         }
       }
     }
+  }
+}
+
+enum class ShimmerAnimationType {
+  FADE, TRANSLATE, FADETRANSLATE, VERTICAL
+}
+
+@Preview
+@Composable
+fun ShimmerList() {
+  var shimmerAnimationType by remember { mutableStateOf(ShimmerAnimationType.FADE) }
+  with(LocalDensity.current) {
+    4.dp.toPx()
+  }
+  val transition = rememberInfiniteTransition()
+  val translateAnim by transition.animateFloat(
+    initialValue = 300f,
+    targetValue = 400f,
+    animationSpec = infiniteRepeatable(
+      tween(durationMillis = 1200, easing = LinearEasing),
+      RepeatMode.Restart
+    )
+  )
+
+  val colorAnim by transition.animateColor(
+    initialValue = Color.LightGray.copy(alpha = 0.6f),
+    targetValue = Color.LightGray,
+    animationSpec = infiniteRepeatable(
+      tween(durationMillis = 1200, easing = FastOutSlowInEasing),
+      RepeatMode.Restart
+    )
+  )
+
+  val list = if (shimmerAnimationType != ShimmerAnimationType.TRANSLATE) {
+    listOf(colorAnim, colorAnim.copy(alpha = 0.5f))
+  } else {
+    listOf(
+      Color(0xFF403A47),
+      AppTheme.colors.backgroundPrimary,
+      Color(0xFF403A47)
+    )
+  }
+
+  val dpValue = if (shimmerAnimationType != ShimmerAnimationType.FADE) {
+    translateAnim.dp
+  } else {
+    2000.dp
+  }
+
+  /*
+    containerColor = if (shimmerAnimationType == type)
+      MaterialTheme.colorScheme.primary else Color.LightGray
+   */
+
+  Column(
+    modifier = Modifier
+      .fillMaxSize()
+      .verticalScroll(rememberScrollState())
+  ) {
+
+    val transition2 = rememberInfiniteTransition()
+    val translateAnim2 by transition2.animateFloat(
+      initialValue = with(LocalDensity.current) {
+        -140.dp.toPx()
+      },
+      targetValue = with(LocalDensity.current) {
+        140.dp.toPx()
+      },
+      animationSpec = infiniteRepeatable(
+        tween(durationMillis = 1200, easing = LinearEasing),
+        RepeatMode.Restart
+      )
+    )
+    val translateAnim3 by transition2.animateFloat(
+      initialValue = with(LocalDensity.current) {
+        -20.dp.toPx()
+      },
+      targetValue = with(LocalDensity.current) {
+        260.dp.toPx()
+      },
+      animationSpec = infiniteRepeatable(
+        tween(durationMillis = 1200, easing = LinearEasing),
+        RepeatMode.Restart
+      )
+    )
+
+    val brush = Brush.horizontalGradient(
+      0.0f to AppTheme.colors.contendTertiary.copy(0.5f),
+      0.1f to Color(0xFF403A47).copy(0.5f),
+      0.5f to AppTheme.colors.contendTertiary.copy(0.5f),
+      0.99f to Color(0xFF403A47).copy(0.5f),
+      1f to AppTheme.colors.contendTertiary.copy(0.5f),
+      startX = translateAnim2,
+      endX = translateAnim3
+    )
+
+    val col = arrayOf(
+      0.0f to AppTheme.colors.contendTertiary.copy(0.5f),
+      0.1f to Color(0xFF403A47).copy(0.5f),
+      0.5f to AppTheme.colors.contendTertiary.copy(0.5f),
+      0.99f to Color(0xFF403A47).copy(0.5f),
+      1f to AppTheme.colors.contendTertiary.copy(0.5f),
+    )
+
+    val brush5 = Brush.horizontalGradient(
+      *col,
+      startX = translateAnim2,
+      endX = translateAnim3
+    )
+
+
+    Row {
+      Spacer(modifier = Modifier
+        .padding(16.dp)
+        .size(40.dp)
+        .background(brush, shape = RoundedCornerShape(20.dp))
+      )
+      BoxWithConstraints(
+        modifier = Modifier.weight(1f)
+      ) {
+        val translateAnim4 by transition2.animateFloat(
+          initialValue = with(LocalDensity.current) {
+            (0.dp - maxWidth - 20.dp).toPx()
+          },
+          targetValue = with(LocalDensity.current) {
+            (maxWidth + 20.dp).toPx()
+          },
+          animationSpec = infiniteRepeatable(
+            tween(durationMillis = 1200, easing = LinearEasing),
+            RepeatMode.Restart
+          )
+        )
+
+        val translateAnim5 by transition2.animateFloat(
+          initialValue = with(LocalDensity.current) {
+            -20.dp.toPx()
+          },
+          targetValue = with(LocalDensity.current) {
+            (maxWidth + maxWidth + 20.dp).toPx()
+          },
+          animationSpec = infiniteRepeatable(
+            tween(durationMillis = 1200, easing = LinearEasing),
+            RepeatMode.Restart
+          )
+        )
+
+        val br = Brush.horizontalGradient(
+          *col,
+          startX = translateAnim4,
+          endX = translateAnim5
+        )
+
+        Column {
+          Spacer(modifier = Modifier.height(16.dp))
+          Spacer(modifier = Modifier
+            .height(16.dp)
+            .fillMaxSize()
+            .size(40.dp)
+            .background(br, shape = RoundedCornerShape(12.dp))
+          )
+        }
+      }
+      Spacer(modifier = Modifier
+        .width(16.dp)
+      )
+    }
+
+    Row(
+      horizontalArrangement = Arrangement.SpaceAround,
+      modifier = Modifier
+        .fillMaxWidth()
+        .padding(8.dp)
+    ) {
+      Button(
+        onClick = { shimmerAnimationType = ShimmerAnimationType.FADE },
+        modifier = Modifier
+          .width(200.dp)
+          .padding(8.dp)
+      ) {
+        Text(text = "Fading")
+      }
+
+      Button(
+        onClick = { shimmerAnimationType = ShimmerAnimationType.TRANSLATE },
+        modifier = Modifier
+          .width(200.dp)
+          .padding(8.dp)
+      ) {
+        Text(text = "Translating")
+      }
+    }
+
+    Row(
+      horizontalArrangement = Arrangement.SpaceAround,
+      modifier = Modifier
+        .fillMaxWidth()
+        .padding(8.dp)
+    ) {
+      Button(
+        onClick = { shimmerAnimationType = ShimmerAnimationType.FADETRANSLATE },
+        modifier = Modifier
+          .width(200.dp)
+          .padding(8.dp)
+      ) {
+        Text(text = "Fade+Translate")
+      }
+      Button(
+        onClick = { shimmerAnimationType = ShimmerAnimationType.VERTICAL },
+        modifier = Modifier
+          .width(200.dp)
+          .padding(8.dp)
+      ) {
+        Text(text = "Vertical")
+      }
+    }
+
+    ShimmerItem(list, dpValue.value, shimmerAnimationType == ShimmerAnimationType.VERTICAL)
+    ShimmerItemBig(list, dpValue.value, shimmerAnimationType == ShimmerAnimationType.VERTICAL)
+    ShimmerItem(list, dpValue.value, shimmerAnimationType == ShimmerAnimationType.VERTICAL)
+    ShimmerItem(list, dpValue.value, shimmerAnimationType == ShimmerAnimationType.VERTICAL)
+  }
+}
+
+@Composable
+fun ShimmerItem(lists: List<Color>, floatAnim: Float = 0f, isVertical: Boolean) {
+  val brush = if (isVertical) Brush.verticalGradient(lists, 0f, floatAnim) else
+    Brush.horizontalGradient(lists, 0f, floatAnim)
+  Row(modifier = Modifier.padding(16.dp)) {
+    Spacer(
+      modifier = Modifier
+        .size(100.dp)
+        .background(brush = brush)
+    )
+    Column(modifier = Modifier.padding(8.dp)) {
+      Spacer(
+        modifier = Modifier
+          .fillMaxWidth()
+          .height(30.dp)
+          .padding(8.dp)
+          .background(brush = brush)
+      )
+      Spacer(
+        modifier = Modifier
+          .fillMaxWidth()
+          .height(30.dp)
+          .padding(8.dp)
+          .background(brush = brush)
+      )
+      Spacer(
+        modifier = Modifier
+          .fillMaxWidth()
+          .height(30.dp)
+          .padding(8.dp)
+          .background(brush = brush)
+      )
+    }
+  }
+}
+
+@Composable
+fun ShimmerItemBig(lists: List<Color>, floatAnim: Float = 0f, isVertical: Boolean) {
+  val brush = if (isVertical) Brush.verticalGradient(lists, 0f, floatAnim) else
+    Brush.horizontalGradient(lists, 0f, floatAnim)
+  Column(modifier = Modifier.padding(16.dp)) {
+    Spacer(
+      modifier = Modifier
+        .fillMaxWidth()
+        .size(200.dp)
+        .background(
+          brush = brush
+        )
+    )
+    Spacer(modifier = Modifier.height(8.dp))
+    Spacer(
+      modifier = Modifier
+        .fillMaxWidth()
+        .height(30.dp)
+        .padding(vertical = 8.dp)
+        .background(brush = brush)
+    )
+    Spacer(
+      modifier = Modifier
+        .fillMaxWidth()
+        .height(30.dp)
+        .padding(vertical = 8.dp)
+        .background(brush = brush)
+    )
   }
 }
