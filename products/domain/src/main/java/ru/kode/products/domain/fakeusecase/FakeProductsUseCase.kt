@@ -23,7 +23,7 @@ class FakeProductsUseCase @Inject constructor(
   override suspend fun loadBankAccount() {
     setState { copy(bankAccountState = LceState.Loading) }
     try {
-      delay(1_300)
+      delay(3_300)
       setState {
         copy(
           bankAccountState = LceState.Content,
@@ -38,7 +38,7 @@ class FakeProductsUseCase @Inject constructor(
   override suspend fun loadDeposits() {
     setState { copy(depositState = LceState.Loading) }
     try {
-      delay(1_300)
+      delay(5_300)
       setState {
         copy(
           depositState = LceState.Content,

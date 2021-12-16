@@ -8,6 +8,9 @@
   <string name="products_additional_card">Дополнительная карта</string>
   <string name="products_detail">Подробнее</string>
 
+  <string name="products_error_part_loading_title">Упс, что-то пошло не так</string>
+  <string name="products_error_part_loading_msg">Не удалось загрузить\nчасть контента</string>
+  <string name="products_error_part_loading_action">Обновить</string>
   <string name="products_physical_card">Физическая</string>
   <string name="products_virtual_card">Виртуальная</string>
   <string name="products_blocked_card">Заблокирована</string>

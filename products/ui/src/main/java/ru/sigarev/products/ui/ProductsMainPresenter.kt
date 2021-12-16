@@ -1,6 +1,8 @@
 package ru.sigarev.products.ui
 
-import kotlinx.coroutines.launch
+import android.util.Log
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
 import ru.dimsuz.unicorn.coroutines.MachineDsl
 import ru.kode.base.core.coroutine.BasePresenter
 import ru.kode.base.internship.routing.AppFlow
@@ -25,8 +27,13 @@ internal class ProductsMainPresenter @Inject constructor(
     initial = ProductsMainScreen.ViewState() to null
 
     executeAsync {
-      productsUseCase.loadBankAccount()
-      productsUseCase.loadDeposits()
+      val banks = async {
+        productsUseCase.loadBankAccount()
+      }
+      val deposits = async {
+        productsUseCase.loadDeposits()
+      }
+      awaitAll(banks, deposits)
     }
 
     onEach(productsUseCase.depositsFlow) {
