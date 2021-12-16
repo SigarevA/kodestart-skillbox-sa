@@ -1,7 +1,7 @@
 package ru.sigarev.products.ui
 
-import androidx.compose.animation.animateColor
-import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.InfiniteRepeatableSpec
+import androidx.compose.animation.core.InfiniteTransition
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
@@ -11,7 +11,6 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
@@ -23,20 +22,14 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.Button
-import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Icon
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
+import androidx.compose.material.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
@@ -46,12 +39,12 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.google.accompanist.insets.navigationBarsWithImePadding
 import com.google.accompanist.insets.statusBarsPadding
-import com.valentinilk.shimmer.shimmer
+import ru.kode.base.internship.core.domain.entity.LceState
 import ru.kode.base.internship.ui.core.uikit.KodeBankBaseController
+import ru.kode.base.internship.ui.core.uikit.component.PrimaryButton
 import ru.kode.base.internship.ui.core.uikit.theme.AppTheme
 import ru.sigarev.products.model.BankAccount
 import ru.sigarev.products.model.Card
@@ -80,33 +73,29 @@ internal class ProductsMainController :
         .statusBarsPadding()
         .navigationBarsWithImePadding()
     ) {
-      ShimmerList()
-    }
-    /*
-    Box(
-      contentAlignment = Alignment.TopCenter,
-      modifier = Modifier
-        .statusBarsPadding()
-        .navigationBarsWithImePadding()
-    ) {
-      val yourShimmerTheme = defaultShimmerTheme.copy(
-        shaderColors = listOf(Color(0xFF403A47).copy(alpha = 0.5f),
-          Color.Unspecified.copy(alpha = 0.5f),
-          Color(0xFF403A47).copy(alpha = 0.5f))
-        //shaderColors = listOf(Color(0xFF403A47), Color(0xFF706D76), Color(0xFF403A47))
-      )
-      CompositionLocalProvider(
-        LocalShimmerTheme provides yourShimmerTheme
-      ) {
-        LazyColumn {
+      LazyColumn {
+        if (state.depositsLceState == LceState.Loading && state.bankAccountsLceState == LceState.Loading)
           item {
-            ShimmerLoading()
+            LoadingHeader(
+              arrayOf(
+                0.0f to AppTheme.colors.contendTertiary.copy(0.5f),
+                0.1f to Color(0xFF403A47).copy(0.5f),
+                0.5f to AppTheme.colors.contendTertiary.copy(0.5f),
+                0.99f to Color(0xFF403A47).copy(0.5f),
+                1f to AppTheme.colors.contendTertiary.copy(0.5f),
+              )
+            )
           }
+        if (state.depositsLceState == LceState.Content || state.bankAccountsLceState == LceState.Content)
           item {
             ScreenHeader()
           }
-          if (state.bankAccountsLceState == LceState.Loading)
-            item { Loading() }
+        if (state.bankAccountsLceState == LceState.Loading)
+          item {
+
+            LoadingBlock()
+          }
+        if (state.bankAccountsLceState == LceState.Content)
           state.bankAccounts?.let { bankinfo ->
             if (bankinfo.bankAccounts.isNotEmpty()) {
               item {
@@ -125,11 +114,12 @@ internal class ProductsMainController :
               }
             }
           }
-          item {
-            Spacer(modifier = Modifier.height(11.dp))
-          }
-          if (state.depositsLceState == LceState.Loading)
-            item { Loading() }
+        item {
+          Spacer(modifier = Modifier.height(11.dp))
+        }
+        if (state.depositsLceState == LceState.Loading)
+          item { LoadingBlock() }
+        if (state.depositsLceState == LceState.Content)
           state.deposits?.let {
             if (it.isNotEmpty()) {
               item {
@@ -142,6 +132,7 @@ internal class ProductsMainController :
               }
             }
           }
+        if (state.depositsLceState == LceState.Content && state.bankAccountsLceState == LceState.Content)
           item {
             PrimaryButton(
               modifier = Modifier
@@ -152,48 +143,10 @@ internal class ProductsMainController :
               }
             )
           }
-        }
-      }
-    }
-    */
-  }
-
-  @Composable
-  fun ShimmerLoading() {
-    Surface(
-      color = AppTheme.colors.contendTertiary,
-      shape = RoundedCornerShape(32.dp),
-      modifier = Modifier
-        .size(64.dp)
-        //.background(AppTheme.colors.backgroundSecondary)
-        .shimmer()
-    ) {
-      Spacer(modifier = Modifier
-        .width(32.dp)
-        .height(32.dp))
-    }
-  }
-
-  @Composable
-  fun Loading() {
-    Surface(
-      color = AppTheme.colors.backgroundSecondary,
-      modifier = Modifier.fillMaxWidth()
-    ) {
-      Box(modifier = Modifier
-        .fillMaxWidth()
-        .padding(16.dp),
-        contentAlignment = Alignment.Center
-      ) {
-        Column {
-          CircularProgressIndicator(
-            modifier = Modifier
-              .padding(end = 16.dp),
-            color = AppTheme.colors.contendAccentPrimary,
-            strokeWidth = 1.5.dp
-          )
-        }
-        ShimmerLoading()
+        if (state.isPartLoadingError)
+          item {
+            ErrorLoadingPartOfContent()
+          }
       }
     }
   }
@@ -393,289 +346,199 @@ internal class ProductsMainController :
   }
 }
 
-enum class ShimmerAnimationType {
-  FADE, TRANSLATE, FADETRANSLATE, VERTICAL
-}
-
-@Preview
 @Composable
-fun ShimmerList() {
-  var shimmerAnimationType by remember { mutableStateOf(ShimmerAnimationType.FADE) }
-  with(LocalDensity.current) {
-    4.dp.toPx()
-  }
-  val transition = rememberInfiniteTransition()
-  val translateAnim by transition.animateFloat(
-    initialValue = 300f,
-    targetValue = 400f,
-    animationSpec = infiniteRepeatable(
-      tween(durationMillis = 1200, easing = LinearEasing),
-      RepeatMode.Restart
-    )
+fun LoadingItem(
+  transition: InfiniteTransition,
+  stopColors: Array<Pair<Float, Color>>,
+  animationSpec: InfiniteRepeatableSpec<Float>,
+  isLast: Boolean = false,
+) {
+
+  val translateAnim2 by transition.animateFloat(
+    initialValue = with(LocalDensity.current) {
+      -140.dp.toPx()
+    },
+    targetValue = with(LocalDensity.current) {
+      140.dp.toPx()
+    },
+    animationSpec = animationSpec
+  )
+  val translateAnim3 by transition.animateFloat(
+    initialValue = with(LocalDensity.current) {
+      -20.dp.toPx()
+    },
+    targetValue = with(LocalDensity.current) {
+      260.dp.toPx()
+    },
+    animationSpec = animationSpec
   )
 
-  val colorAnim by transition.animateColor(
-    initialValue = Color.LightGray.copy(alpha = 0.6f),
-    targetValue = Color.LightGray,
-    animationSpec = infiniteRepeatable(
-      tween(durationMillis = 1200, easing = FastOutSlowInEasing),
-      RepeatMode.Restart
-    )
+
+  val brush = Brush.horizontalGradient(
+    *stopColors,
+    startX = translateAnim2,
+    endX = translateAnim3
   )
 
-  val list = if (shimmerAnimationType != ShimmerAnimationType.TRANSLATE) {
-    listOf(colorAnim, colorAnim.copy(alpha = 0.5f))
-  } else {
-    listOf(
-      Color(0xFF403A47),
-      AppTheme.colors.backgroundPrimary,
-      Color(0xFF403A47)
+
+  Row {
+    Spacer(modifier = Modifier
+      .padding(16.dp)
+      .size(40.dp)
+      .background(brush, shape = RoundedCornerShape(20.dp))
     )
-  }
+    BoxWithConstraints(
+      modifier = Modifier.weight(1f)
+    ) {
 
-  val dpValue = if (shimmerAnimationType != ShimmerAnimationType.FADE) {
-    translateAnim.dp
-  } else {
-    2000.dp
-  }
-
-  /*
-    containerColor = if (shimmerAnimationType == type)
-      MaterialTheme.colorScheme.primary else Color.LightGray
-   */
-
-  Column(
-    modifier = Modifier
-      .fillMaxSize()
-      .verticalScroll(rememberScrollState())
-  ) {
-
-    val transition2 = rememberInfiniteTransition()
-    val translateAnim2 by transition2.animateFloat(
-      initialValue = with(LocalDensity.current) {
-        -140.dp.toPx()
-      },
-      targetValue = with(LocalDensity.current) {
-        140.dp.toPx()
-      },
-      animationSpec = infiniteRepeatable(
-        tween(durationMillis = 1200, easing = LinearEasing),
-        RepeatMode.Restart
-      )
-    )
-    val translateAnim3 by transition2.animateFloat(
-      initialValue = with(LocalDensity.current) {
-        -20.dp.toPx()
-      },
-      targetValue = with(LocalDensity.current) {
-        260.dp.toPx()
-      },
-      animationSpec = infiniteRepeatable(
-        tween(durationMillis = 1200, easing = LinearEasing),
-        RepeatMode.Restart
-      )
-    )
-
-    val brush = Brush.horizontalGradient(
-      0.0f to AppTheme.colors.contendTertiary.copy(0.5f),
-      0.1f to Color(0xFF403A47).copy(0.5f),
-      0.5f to AppTheme.colors.contendTertiary.copy(0.5f),
-      0.99f to Color(0xFF403A47).copy(0.5f),
-      1f to AppTheme.colors.contendTertiary.copy(0.5f),
-      startX = translateAnim2,
-      endX = translateAnim3
-    )
-
-    val col = arrayOf(
-      0.0f to AppTheme.colors.contendTertiary.copy(0.5f),
-      0.1f to Color(0xFF403A47).copy(0.5f),
-      0.5f to AppTheme.colors.contendTertiary.copy(0.5f),
-      0.99f to Color(0xFF403A47).copy(0.5f),
-      1f to AppTheme.colors.contendTertiary.copy(0.5f),
-    )
-
-    val brush5 = Brush.horizontalGradient(
-      *col,
-      startX = translateAnim2,
-      endX = translateAnim3
-    )
-
-
-    Row {
-      Spacer(modifier = Modifier
-        .padding(16.dp)
-        .size(40.dp)
-        .background(brush, shape = RoundedCornerShape(20.dp))
-      )
-      BoxWithConstraints(
-        modifier = Modifier.weight(1f)
-      ) {
-        val translateAnim4 by transition2.animateFloat(
-          initialValue = with(LocalDensity.current) {
-            (0.dp - maxWidth - 20.dp).toPx()
-          },
-          targetValue = with(LocalDensity.current) {
-            (maxWidth + 20.dp).toPx()
-          },
-          animationSpec = infiniteRepeatable(
-            tween(durationMillis = 1200, easing = LinearEasing),
-            RepeatMode.Restart
-          )
+      val translateAnim4 by with(LocalDensity.current) {
+        transition.animateFloat(
+          initialValue = (-maxWidth - maxWidth.div(2)).toPx(),
+          targetValue = (maxWidth + maxWidth.div(2)).toPx(),
+          animationSpec = animationSpec
         )
+      }
 
-        val translateAnim5 by transition2.animateFloat(
-          initialValue = with(LocalDensity.current) {
-            -20.dp.toPx()
-          },
-          targetValue = with(LocalDensity.current) {
-            (maxWidth + maxWidth + 20.dp).toPx()
-          },
-          animationSpec = infiniteRepeatable(
-            tween(durationMillis = 1200, easing = LinearEasing),
-            RepeatMode.Restart
-          )
+      val translateAnim5 by with(LocalDensity.current) {
+        transition.animateFloat(
+          initialValue = -maxWidth.div(2).toPx(),
+          targetValue = (maxWidth + maxWidth + maxWidth.div(2)).toPx(),
+          animationSpec = animationSpec
         )
+      }
 
-        val br = Brush.horizontalGradient(
-          *col,
-          startX = translateAnim4,
-          endX = translateAnim5
+      val br = Brush.horizontalGradient(
+        *stopColors,
+        startX = translateAnim4,
+        endX = translateAnim5
+      )
+
+      Column {
+        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier
+          .height(16.dp)
+          .fillMaxSize()
+          .background(br, shape = RoundedCornerShape(12.dp))
         )
-
-        Column {
-          Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier
+          .height(12.dp)
+          .fillMaxSize(0.55f)
+          .background(br, shape = RoundedCornerShape(12.dp))
+        )
+        Spacer(modifier = Modifier.height(16.dp))
+        if (!isLast)
           Spacer(modifier = Modifier
-            .height(16.dp)
-            .fillMaxSize()
-            .size(40.dp)
-            .background(br, shape = RoundedCornerShape(12.dp))
+            .height(1.dp)
+            .fillMaxWidth()
+            .background(AppTheme.colors.contendSecondary)
           )
-        }
-      }
-      Spacer(modifier = Modifier
-        .width(16.dp)
-      )
-    }
-
-    Row(
-      horizontalArrangement = Arrangement.SpaceAround,
-      modifier = Modifier
-        .fillMaxWidth()
-        .padding(8.dp)
-    ) {
-      Button(
-        onClick = { shimmerAnimationType = ShimmerAnimationType.FADE },
-        modifier = Modifier
-          .width(200.dp)
-          .padding(8.dp)
-      ) {
-        Text(text = "Fading")
-      }
-
-      Button(
-        onClick = { shimmerAnimationType = ShimmerAnimationType.TRANSLATE },
-        modifier = Modifier
-          .width(200.dp)
-          .padding(8.dp)
-      ) {
-        Text(text = "Translating")
       }
     }
-
-    Row(
-      horizontalArrangement = Arrangement.SpaceAround,
-      modifier = Modifier
-        .fillMaxWidth()
-        .padding(8.dp)
-    ) {
-      Button(
-        onClick = { shimmerAnimationType = ShimmerAnimationType.FADETRANSLATE },
-        modifier = Modifier
-          .width(200.dp)
-          .padding(8.dp)
-      ) {
-        Text(text = "Fade+Translate")
-      }
-      Button(
-        onClick = { shimmerAnimationType = ShimmerAnimationType.VERTICAL },
-        modifier = Modifier
-          .width(200.dp)
-          .padding(8.dp)
-      ) {
-        Text(text = "Vertical")
-      }
-    }
-
-    ShimmerItem(list, dpValue.value, shimmerAnimationType == ShimmerAnimationType.VERTICAL)
-    ShimmerItemBig(list, dpValue.value, shimmerAnimationType == ShimmerAnimationType.VERTICAL)
-    ShimmerItem(list, dpValue.value, shimmerAnimationType == ShimmerAnimationType.VERTICAL)
-    ShimmerItem(list, dpValue.value, shimmerAnimationType == ShimmerAnimationType.VERTICAL)
+    Spacer(modifier = Modifier
+      .width(16.dp)
+    )
   }
 }
 
 @Composable
-fun ShimmerItem(lists: List<Color>, floatAnim: Float = 0f, isVertical: Boolean) {
-  val brush = if (isVertical) Brush.verticalGradient(lists, 0f, floatAnim) else
-    Brush.horizontalGradient(lists, 0f, floatAnim)
-  Row(modifier = Modifier.padding(16.dp)) {
-    Spacer(
-      modifier = Modifier
-        .size(100.dp)
-        .background(brush = brush)
+fun ErrorLoadingPartOfContent() {
+  Column(
+    modifier = Modifier.fillMaxWidth(),
+    horizontalAlignment = Alignment.CenterHorizontally) {
+    Spacer(modifier = Modifier.height(35.dp))
+    Text(
+      stringResource(id = R.string.products_error_part_loading_title),
+      color = AppTheme.colors.textPrimary,
+      style = AppTheme.typography.bodyMedium)
+    Spacer(modifier = Modifier.height(4.dp))
+    Text(stringResource(id = R.string.products_error_part_loading_msg),
+      color = AppTheme.colors.textSecondary,
+      style = AppTheme.typography.body2,
+      textAlign = TextAlign.Center
     )
-    Column(modifier = Modifier.padding(8.dp)) {
-      Spacer(
-        modifier = Modifier
-          .fillMaxWidth()
-          .height(30.dp)
-          .padding(8.dp)
-          .background(brush = brush)
-      )
-      Spacer(
-        modifier = Modifier
-          .fillMaxWidth()
-          .height(30.dp)
-          .padding(8.dp)
-          .background(brush = brush)
-      )
-      Spacer(
-        modifier = Modifier
-          .fillMaxWidth()
-          .height(30.dp)
-          .padding(8.dp)
-          .background(brush = brush)
+    Spacer(modifier = Modifier.height(16.dp))
+    TextButton(onClick = { /*TODO*/ }) {
+      Text(
+        stringResource(id = R.string.products_error_part_loading_action),
+        color = AppTheme.colors.primaryButton,
+        style = AppTheme.typography.bodySemibold
       )
     }
+    Spacer(modifier = Modifier.height(35.dp))
   }
 }
 
+internal val ProductsMainScreen.ViewState.isPartLoadingError: Boolean
+  get() =
+    (this.bankAccountsLceState is LceState.Error && this.depositsLceState !is LceState.Error) ||
+      (this.depositsLceState is LceState.Error && bankAccountsLceState !is LceState.Error)
+
+
 @Composable
-fun ShimmerItemBig(lists: List<Color>, floatAnim: Float = 0f, isVertical: Boolean) {
-  val brush = if (isVertical) Brush.verticalGradient(lists, 0f, floatAnim) else
-    Brush.horizontalGradient(lists, 0f, floatAnim)
-  Column(modifier = Modifier.padding(16.dp)) {
-    Spacer(
-      modifier = Modifier
-        .fillMaxWidth()
-        .size(200.dp)
-        .background(
-          brush = brush
-        )
+fun LoadingHeader(stopColors: Array<Pair<Float, Color>>) {
+  val transition = rememberInfiniteTransition()
+
+  val translateAnim4 by with(LocalDensity.current) {
+    transition.animateFloat(
+      initialValue = -180.dp.toPx(),
+      targetValue = 180.dp.toPx(),
+      animationSpec = infiniteRepeatable(
+        tween(durationMillis = 1200, easing = LinearEasing),
+        RepeatMode.Restart
+      )
     )
-    Spacer(modifier = Modifier.height(8.dp))
-    Spacer(
-      modifier = Modifier
-        .fillMaxWidth()
-        .height(30.dp)
-        .padding(vertical = 8.dp)
-        .background(brush = brush)
+  }
+
+  val translateAnim5 by with(LocalDensity.current) {
+    transition.animateFloat(
+      initialValue = -20.dp.toPx(),
+      targetValue = 340.dp.toPx(),
+      animationSpec = infiniteRepeatable(
+        tween(durationMillis = 1200, easing = LinearEasing),
+        RepeatMode.Restart
+      )
     )
-    Spacer(
-      modifier = Modifier
-        .fillMaxWidth()
-        .height(30.dp)
-        .padding(vertical = 8.dp)
-        .background(brush = brush)
-    )
+  }
+
+  val brush = Brush.horizontalGradient(
+    *stopColors,
+    startX = translateAnim4,
+    endX = translateAnim5
+  )
+
+  Spacer(
+    modifier = Modifier
+      .padding(start = 16.dp)
+      .height(32.dp)
+      .width(160.dp)
+      .background(brush, shape = RoundedCornerShape(12.dp))
+  )
+}
+
+@Composable
+fun LoadingBlock() {
+  val transition = rememberInfiniteTransition()
+  val col = arrayOf(
+    0.0f to AppTheme.colors.contendTertiary.copy(0.5f),
+    0.1f to Color(0xFF403A47).copy(0.5f),
+    0.5f to AppTheme.colors.contendTertiary.copy(0.5f),
+    0.99f to Color(0xFF403A47).copy(0.5f),
+    1f to AppTheme.colors.contendTertiary.copy(0.5f),
+  )
+  Column(
+    modifier = Modifier.background(AppTheme.colors.backgroundSecondary)
+  ) {
+    repeat(3) {
+      LoadingItem(
+        transition,
+        col,
+        infiniteRepeatable(
+          tween(durationMillis = 1200, easing = LinearEasing),
+          RepeatMode.Restart
+        ),
+        it == 2
+      )
+    }
   }
 }
