@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <string name="products_main">Главная</string>
+  <string name="products_accounts">Счета</string>
+  <string name="products_deposits">Вклады</string>
+
+  <string name="products_salary_card">Карта зарплатная</string>
+  <string name="products_additional_card">Дополнительная карта</string>
+  <string name="products_detail">Подробнее</string>
+
+  <string name="products_physical_card">Физическая</string>
+  <string name="products_virtual_card">Виртуальная</string>
+  <string name="products_blocked_card">Заблокирована</string>
+  <string name="products_open_new_deposit_product">Открыть новый счет или продукт</string>
+</resources>

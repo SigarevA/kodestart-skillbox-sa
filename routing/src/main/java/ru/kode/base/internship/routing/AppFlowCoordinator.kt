@@ -20,10 +20,10 @@ internal class AppFlowCoordinator @Inject constructor(
   }
 
   override fun handleEvent(event: AppFlow.Event) {
-    when(event) {
+    when (event) {
       AppFlow.Event.LoginRequested -> router.push(AppRoute.Login.EnterPassword, createContext())
       AppFlow.Event.EnterPasswordDismissed -> router.pop()
-      AppFlow.Event.UserLoggedIn -> Unit
+      AppFlow.Event.UserLoggedIn -> router.push(AppRoute.Products.ProductsMainKey, createContext())
     }
   }
 }

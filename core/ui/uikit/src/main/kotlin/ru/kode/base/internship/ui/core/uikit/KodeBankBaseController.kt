@@ -1,6 +1,7 @@
 package ru.kode.base.internship.ui.core.uikit
 
 import android.content.Context
+import androidx.compose.material.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import coil.ImageLoader
@@ -22,10 +23,12 @@ abstract class KodeBankBaseController<VS : Any, VI : BaseViewIntents> : BaseComp
 
   @Composable
   final override fun Content(state: VS) {
-    AppTheme {
+    AppTheme(useDarkTheme = true) {
       ProvideWindowInsets(consumeWindowInsets = false) {
         CompositionLocalProvider(LocalImageLoader provides imageLoader) {
-          ScreenContent(state)
+          Surface(color = AppTheme.colors.backgroundPrimary) {
+            ScreenContent(state)
+          }
         }
       }
     }

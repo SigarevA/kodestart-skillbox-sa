@@ -6,4 +6,6 @@ include ':app',
   ':routing',
   ':auth:ui',
   ':auth:data',
-  ':auth:domain'
+  ':auth:domain',
+  ':products:ui'
+include ':products:domain'
