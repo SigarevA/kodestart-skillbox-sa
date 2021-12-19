@@ -1,0 +1,49 @@
+plugins {
+  id 'com.android.library'
+  id 'kotlin-android'
+  id 'kotlin-parcelize'
+  id 'kotlin-kapt'
+}
+
+android {
+  compileSdk 31
+  buildToolsVersion "30.0.3"
+
+  defaultConfig {
+    minSdk 26
+    targetSdk 31
+    versionCode 1
+    versionName "1.0"
+
+    buildConfigField 'boolean', 'DEV', 'Boolean.parseBoolean("false")'
+    buildConfigField 'boolean', 'RELEASE', 'Boolean.parseBoolean("false")'
+
+  }
+
+
+  buildFeatures {
+    compose = true
+  }
+
+  buildTypes {
+    debug {
+      buildConfigField 'boolean', 'DEV', 'Boolean.parseBoolean("true")'
+    }
+    release {
+      buildConfigField 'boolean', 'RELEASE', 'true'
+    }
+  }
+
+  composeOptions {
+    kotlinCompilerExtensionVersion Deps.composeVersion
+  }
+}
+
+dependencies {
+  implementation project(":core:ui:uikit")
+
+  implementation project(':card:domain')
+  implementation project(':routing')
+
+  kapt Deps.toothpickProcessor
+}
