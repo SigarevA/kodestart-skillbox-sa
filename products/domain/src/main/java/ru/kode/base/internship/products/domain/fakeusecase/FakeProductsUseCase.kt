@@ -13,13 +13,13 @@ import kotlinx.coroutines.flow.toList
 import ru.kode.base.internship.core.domain.BaseUseCase
 import ru.kode.base.internship.core.domain.entity.LceState
 import ru.kode.base.internship.domain.Card
+import ru.kode.base.internship.products.domain.mappers.toAccount
 import ru.kode.base.internship.products.domain.models.Account
 import ru.kode.base.internship.products.domain.models.Deposit
 import ru.kode.base.internship.products.domain.models.GeneralAccount
 import ru.kode.base.internship.products.domain.repositories.AccountRepository
 import ru.kode.base.internship.products.domain.repositories.CardRepository
 import ru.kode.base.internship.products.domain.repositories.DepositRepository
-import timber.log.Timber
 import javax.inject.Inject
 
 internal class FakeProductsUseCase @Inject constructor(
@@ -35,39 +35,14 @@ internal class FakeProductsUseCase @Inject constructor(
     val accounts: List<Account> = emptyList(),
   )
 
-  /*
-  override suspend fun loadBankAccount(isRefresh: Boolean) {
-    if (!isRefresh)
-      setState { copy(bankAccountState = LceState.Loading) }
-    try {
-      accountRepository.load()
-      setState {
-        copy(bankAccountState = LceState.Content)
-      }
-    } catch (e: Exception) {
-      setState { copy(bankAccountState = LceState.Error(e.message)) }
-    }
-  }
-  */
-
   override suspend fun loadBankAccount(isRefresh: Boolean) {
     setState { copy(bankAccountState = LceState.Loading) }
     accountRepository.accounts
       .onEach { accounts ->
         setState {
-          val newAccounts = accounts.map {
-            Account(
-              it.id,
-              it.number,
-              it.balance,
-              enumValueOf(it.currency),
-              it.status,
-              emptyList()
-            )
-          }
           copy(
             bankAccountState = LceState.Content,
-            accounts = newAccounts
+            accounts = accounts.map { it.toAccount() }
           )
         }
         loadCards(accounts)
@@ -84,18 +59,22 @@ internal class FakeProductsUseCase @Inject constructor(
       account.cards.forEach { cardId ->
         cardRepository.cardDetails(cardId)
           .onEach { card ->
-            Timber.d("onEach card : $card")
             setState {
               copy(accounts = this.accounts.map {
                 if (it.id == account.id) {
                   val newCards = ArrayList<Card>().apply {
-                    //val preIndex = indexOf(card)
-                    //if (preIndex != -1)
-                    //  removeAt(preIndex)
-                    addAll(it.cards)
-                    add(card)
+                    var flag = true
+                    addAll(it.cards
+                      .map { oldCard ->
+                        if (oldCard.id == card.id) {
+                          flag = false
+                          card
+                        } else oldCard
+                      }
+                    )
+                    if (flag)
+                      add(card)
                   }
-                  Timber.d("size newCards size : ${newCards.size}")
                   it.copy(cards = newCards)
                 } else
                   it
