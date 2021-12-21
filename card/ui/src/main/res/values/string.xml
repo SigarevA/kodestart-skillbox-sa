@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <string name="card_title">Карты</string>
+  <string name="changing_name_of_card_successfully">Карта успешно переименована</string>
+  <string name="changing_name_of_card_failure">Карта успешно переименована</string>
+  <string name="change_name_card">Переименовать карту</string>
+
+  <string name="physical_card">физическа</string>
+  <string name="virtual_card">виртуальная</string>
+  <string name="card_blocked">Заблокирована</string>
+  <string name="rename">Переименовать</string>
+  <string name="input_new_name">Введите новое название</string>
+  <string name="cancel">Отмена</string>
+  <string name="save">Сохранить</string>
+</resources>

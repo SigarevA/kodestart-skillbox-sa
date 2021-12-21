@@ -9,3 +9,7 @@ include ':app',
   ':auth:domain',
   ':products:ui'
 include ':products:domain'
+include ':products:data'
+include ':card:ui'
+include ':card:domain'
+include ':domain:card'

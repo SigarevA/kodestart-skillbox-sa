@@ -7,6 +7,9 @@
         <entry key="..\:/Users/User/AndroidStudioProjects/android-trainee-base-project/auth/ui/src/main/res/drawable/ic_phone_24.xml" value="0.2203125" />
         <entry key="..\:/Users/User/AndroidStudioProjects/android-trainee-base-project/auth/ui/src/main/res/drawable/ic_sub_logo.xml" value="0.2203125" />
         <entry key="..\:/Users/User/AndroidStudioProjects/android-trainee-base-project/auth/ui/src/main/res/drawable/img_kode_logo_90x40.xml" value="0.2203125" />
+        <entry key="..\:/Users/User/AndroidStudioProjects/android-trainee-base-project/card/ui/src/main/res/drawable/bg_card.xml" value="0.12037037037037036" />
+        <entry key="..\:/Users/User/AndroidStudioProjects/android-trainee-base-project/card/ui/src/main/res/drawable/ic_close.xml" value="0.1175925925925926" />
+        <entry key="..\:/Users/User/AndroidStudioProjects/android-trainee-base-project/card/ui/src/main/res/drawable/ic_visa.xml" value="0.12037037037037036" />
         <entry key="..\:/Users/User/AndroidStudioProjects/android-trainee-base-project/products/ui/src/main/res/drawable/bg_card.xml" value="0.2203125" />
         <entry key="..\:/Users/User/AndroidStudioProjects/android-trainee-base-project/products/ui/src/main/res/drawable/ic_dollar.xml" value="0.2203125" />
         <entry key="..\:/Users/User/AndroidStudioProjects/android-trainee-base-project/products/ui/src/main/res/drawable/ic_dsadas.xml" value="0.1" />
@@ -19,11 +22,10 @@
         <entry key="..\:/Users/User/AndroidStudioProjects/android-trainee-base-project/products/ui/src/main/res/drawable/ic_rubsdfsdf.xml" value="0.1" />
         <entry key="..\:/Users/User/AndroidStudioProjects/android-trainee-base-project/products/ui/src/main/res/drawable/ic_rusadasd.xml" value="0.1" />
         <entry key="..\:/Users/User/AndroidStudioProjects/android-trainee-base-project/products/ui/src/main/res/drawable/test.xml" value="0.2203125" />
-        <entry key="..\:/Users/user/AndroidStudioProjects/kodestart-skillbox-sa/products/ui/src/main/res/drawable/ic_euro.xml" value="0.3712962962962963" />
       </map>
     </option>
   </component>
-  <component name="ProjectRootManager" version="2" languageLevel="JDK_11" default="true" project-jdk-name="11" project-jdk-type="JavaSDK">
+  <component name="ProjectRootManager" version="2" languageLevel="JDK_11" default="true" project-jdk-name="JDK" project-jdk-type="JavaSDK">
     <output url="file://$PROJECT_DIR$/build/classes" />
   </component>
   <component name="ProjectType">

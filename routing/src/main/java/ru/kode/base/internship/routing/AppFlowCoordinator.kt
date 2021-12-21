@@ -24,6 +24,7 @@ internal class AppFlowCoordinator @Inject constructor(
       AppFlow.Event.LoginRequested -> router.push(AppRoute.Login.EnterPassword, createContext())
       AppFlow.Event.EnterPasswordDismissed -> router.pop()
       AppFlow.Event.UserLoggedIn -> router.push(AppRoute.Products.Main, createContext())
+      is AppFlow.Event.CardDetailRequest -> router.push(AppRoute.Products.DetailCard(event.cardId), createContext())
     }
   }
 }

@@ -15,4 +15,9 @@
   <string name="products_virtual_card">Виртуальная</string>
   <string name="products_blocked_card">Заблокирована</string>
   <string name="products_open_new_deposit_product">Открыть новый счет или продукт</string>
+  <string name="products_bid">Ставка %s</string>
+  <string name="products_currency_ruble">%s ₽</string>
+  <string name="products_currency_dollar">%s $</string>
+  <string name="products_currency_euro">%s €</string>
+  <string name="products_deposit_closing_date">до %s</string>
 </resources>

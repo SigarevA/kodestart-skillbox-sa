@@ -12,6 +12,7 @@ sealed class AppRoute(override val path: String) : Route {
   }
 
   sealed class Products(path: String) : AppRoute(path) {
-    object Main : Products("/login/user_identification")
+    object Main : Products("/products/main")
+    class DetailCard(val cardId : Long) : Products("/products/card")
   }
 }

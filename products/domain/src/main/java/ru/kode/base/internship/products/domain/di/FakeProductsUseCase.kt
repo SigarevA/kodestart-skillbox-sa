@@ -1,4 +1,4 @@
-package ru.kode.base.internship.products.di
+package ru.kode.base.internship.products.domain.di
 
 import ru.kode.base.internship.products.domain.fakeusecase.FakeProductsUseCase
 import ru.kode.base.internship.products.domain.fakeusecase.ProductsUseCase

@@ -35,6 +35,8 @@ dependencies {
   implementation project(":auth:data")
   implementation project(":auth:domain")
   implementation project(":products:domain")
+  implementation project(":products:data")
+  implementation project(":card:domain")
 
   kapt Deps.toothpickProcessor
 }
