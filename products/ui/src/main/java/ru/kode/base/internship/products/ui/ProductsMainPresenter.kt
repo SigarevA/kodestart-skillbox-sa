@@ -2,6 +2,8 @@ package ru.kode.base.internship.products.ui
 
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.launch
 import ru.dimsuz.unicorn.coroutines.MachineDsl
 import ru.kode.base.core.coroutine.BasePresenter

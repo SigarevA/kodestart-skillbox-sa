@@ -10,7 +10,7 @@ import java.util.Date
 internal object FakeData {
   val accounts = mutableListOf(
     GeneralAccount(
-      0, "0467683482412661", 1_515_000.2, "RUB", "Активен", listOf(0, 1)
+      2, "0467683482412661", 1_515_000.2, "RUB", "Активен", listOf(0, 1)
     )
   )
 
