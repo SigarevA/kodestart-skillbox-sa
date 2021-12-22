@@ -91,13 +91,12 @@ internal class FakeProductsUseCase @Inject constructor(
   }
 
   override suspend fun loadDeposits(isRefresh: Boolean) {
-    if (!isRefresh)
-      setState { copy(depositState = LceState.Loading) }
+    setState { copy(depositState = LceState.Loading) }
     try {
       depositRepository.deposits
         .onEach { deposits ->
           deposits.forEach { deposit ->
-            depositRepository.getTerm(deposit.id)
+            depositRepository.getTerm(deposit.id, isRefresh)
               .onEach {
 
               }
@@ -106,7 +105,7 @@ internal class FakeProductsUseCase @Inject constructor(
           }
         }
         .launchIn(scope)
-      depositRepository.load()
+      depositRepository.load(isRefresh)
       setState {
         copy(depositState = LceState.Content)
       }

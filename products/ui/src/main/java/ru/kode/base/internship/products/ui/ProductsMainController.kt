@@ -107,7 +107,7 @@ internal class ProductsMainController :
         }
       ) {
         LazyColumn {
-          if (state.depositsLceState == LceState.Loading && state.bankAccountsLceState == LceState.Loading)
+          if (state.depositsLceState == LceState.Loading && state.bankAccountsLceState == LceState.Loading && !state.isRefresh)
             item {
               Spacer(modifier = Modifier.height(50.dp))
               LoadingHeader(
@@ -121,7 +121,7 @@ internal class ProductsMainController :
             item {
               ScreenHeader()
             }
-          if (state.bankAccountsLceState == LceState.Loading)
+          if (state.bankAccountsLceState == LceState.Loading && !state.isRefreshAccount)
             item {
               LoadingBlock(transition, animationSpec, stopLists)
             }
@@ -147,7 +147,7 @@ internal class ProductsMainController :
           item {
             Spacer(modifier = Modifier.height(11.dp))
           }
-          if (state.depositsLceState == LceState.Loading)
+          if (state.depositsLceState == LceState.Loading && !state.isRefreshDeposit)
             item { LoadingBlock(transition, animationSpec, stopLists) }
           if (state.depositsLceState == LceState.Content)
             state.deposits?.let { deposits ->

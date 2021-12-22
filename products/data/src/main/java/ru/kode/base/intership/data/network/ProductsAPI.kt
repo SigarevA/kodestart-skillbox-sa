@@ -4,6 +4,7 @@ import retrofit2.http.GET
 import retrofit2.http.Path
 import ru.kode.base.intership.data.network.entities.AccountHolderResponse
 import ru.kode.base.intership.data.network.entities.DepositHolderResponse
+import ru.kode.base.intership.data.network.entities.DepositTermResponse
 import ru.kode.base.intership.data.network.entities.DetailCardResponse
 
 internal interface ProductsAPI {
@@ -17,4 +18,9 @@ internal interface ProductsAPI {
 
   @GET("api/core/deposit/list")
   suspend fun fetchDeposit(): DepositHolderResponse
+
+  @GET("/api/core/deposit/{deposit_id}")
+  suspend fun fetchDepositTerms(
+    @Path("deposit_id") depositId : Long
+  ): DepositTermResponse?
 }
