@@ -25,6 +25,7 @@
             <option value="$PROJECT_DIR$/core/domain" />
             <option value="$PROJECT_DIR$/core/ui" />
             <option value="$PROJECT_DIR$/core/ui/uikit" />
+            <option value="$PROJECT_DIR$/core/wiring" />
             <option value="$PROJECT_DIR$/domain" />
             <option value="$PROJECT_DIR$/domain/card" />
             <option value="$PROJECT_DIR$/products" />

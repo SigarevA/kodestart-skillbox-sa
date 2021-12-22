@@ -13,6 +13,7 @@ import kotlinx.coroutines.flow.toList
 import ru.kode.base.internship.core.domain.BaseUseCase
 import ru.kode.base.internship.core.domain.entity.LceState
 import ru.kode.base.internship.domain.Card
+import ru.kode.base.internship.products.domain.mappers.toAccount
 import ru.kode.base.internship.products.domain.models.Account
 import ru.kode.base.internship.products.domain.models.Deposit
 import ru.kode.base.internship.products.domain.models.GeneralAccount
@@ -35,67 +36,48 @@ internal class FakeProductsUseCase @Inject constructor(
     val accounts: List<Account> = emptyList(),
   )
 
-  /*
-  override suspend fun loadBankAccount(isRefresh: Boolean) {
-    if (!isRefresh)
-      setState { copy(bankAccountState = LceState.Loading) }
-    try {
-      accountRepository.load()
-      setState {
-        copy(bankAccountState = LceState.Content)
-      }
-    } catch (e: Exception) {
-      setState { copy(bankAccountState = LceState.Error(e.message)) }
-    }
-  }
-  */
-
   override suspend fun loadBankAccount(isRefresh: Boolean) {
     setState { copy(bankAccountState = LceState.Loading) }
     accountRepository.accounts
       .onEach { accounts ->
         setState {
-          val newAccounts = accounts.map {
-            Account(
-              it.id,
-              it.number,
-              it.balance,
-              enumValueOf(it.currency),
-              it.status,
-              emptyList()
-            )
-          }
           copy(
             bankAccountState = LceState.Content,
-            accounts = newAccounts
+            accounts = accounts.map { it.toAccount() }
           )
         }
-        loadCards(accounts)
+        loadCards(accounts, isRefresh)
       }
       .catch { e ->
         setState { copy(bankAccountState = LceState.Error(e.message)) }
+        Timber.e(e, e.message)
       }
       .launchIn(scope)
-    accountRepository.load()
+    accountRepository.load(isRefresh)
   }
 
-  private fun loadCards(accounts: List<GeneralAccount>) {
+  private suspend fun loadCards(accounts: List<GeneralAccount>, isRefresh: Boolean) {
     accounts.forEach { account ->
       account.cards.forEach { cardId ->
-        cardRepository.cardDetails(cardId)
+        cardRepository.cardDetails(cardId, isRefresh)
           .onEach { card ->
-            Timber.d("onEach card : $card")
             setState {
               copy(accounts = this.accounts.map {
                 if (it.id == account.id) {
+                  var flag = true
                   val newCards = ArrayList<Card>().apply {
-                    //val preIndex = indexOf(card)
-                    //if (preIndex != -1)
-                    //  removeAt(preIndex)
-                    addAll(it.cards)
-                    add(card)
+                    addAll(
+                      it.cards.map { oldCard ->
+                        if (oldCard.id == card.id) {
+                          flag = false
+                          card
+                        } else
+                          oldCard
+                      }
+                    )
+                    if (flag)
+                      add(card)
                   }
-                  Timber.d("size newCards size : ${newCards.size}")
                   it.copy(cards = newCards)
                 } else
                   it
@@ -112,6 +94,18 @@ internal class FakeProductsUseCase @Inject constructor(
     if (!isRefresh)
       setState { copy(depositState = LceState.Loading) }
     try {
+      depositRepository.deposits
+        .onEach { deposits ->
+          deposits.forEach { deposit ->
+            depositRepository.getTerm(deposit.id)
+              .onEach {
+
+              }
+              .catch { }
+              .launchIn(scope)
+          }
+        }
+        .launchIn(scope)
       depositRepository.load()
       setState {
         copy(depositState = LceState.Content)

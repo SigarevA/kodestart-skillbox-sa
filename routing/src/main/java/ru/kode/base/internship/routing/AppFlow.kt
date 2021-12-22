@@ -7,7 +7,7 @@ import ru.kode.base.internship.auth.domain.di.AuthDataModule
 import ru.kode.base.internship.auth.domain.di.AuthDomainModule
 import ru.kode.base.internship.domain.card.di.DetailCardDomainModule
 import ru.kode.base.internship.products.domain.di.ProductsFakeDomainModule
-import ru.kode.base.intership.data.products.di.ProductsDataModule
+import ru.kode.base.intership.data.di.ProductsDataModule
 
 interface AppFlow {
   companion object : FlowConstructor<Coordinator, Unit, Unit>(

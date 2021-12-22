@@ -1,0 +1,17 @@
+CREATE TABLE DepositTerm (
+    depositID INTEGER NOT NULL,
+    closeDate INTEGER NOT NULL,
+    rate REAL NOT NULL,
+    FOREIGN KEY (depositID) REFERENCES DepositEntity(id)
+);
+
+getDepositTermByDepositID:
+SELECT *
+FROM DepositTerm
+WHERE depositID = :id
+;
+
+insertDepositTerm:
+INSERT OR REPLACE
+INTO DepositTerm
+VALUES (?, ?, ?);

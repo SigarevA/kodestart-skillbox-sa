@@ -8,25 +8,33 @@ import kotlinx.coroutines.flow.flow
 import ru.kode.base.internship.products.domain.models.DepositTerm
 import ru.kode.base.internship.products.domain.models.GeneralDeposit
 import ru.kode.base.internship.products.domain.repositories.DepositRepository
+import ru.kode.base.intership.data.network.ProductsAPI
 import ru.kode.base.intership.data.products.FakeData
+import ru.kode.base.intership.products.data.ProductsDataBase
 
 import javax.inject.Inject
 
-internal class DepositRepositoryImpl @Inject constructor() : DepositRepository {
+internal class DepositRepositoryImpl @Inject constructor(
+  private val productsAPI: ProductsAPI,
+  private val db : ProductsDataBase
+) : DepositRepository {
   private val _deposits: MutableSharedFlow<List<GeneralDeposit>> = MutableSharedFlow()
 
   override val deposits: Flow<List<GeneralDeposit>>
     get() = _deposits.asSharedFlow()
 
   override suspend fun load() {
-    delay(5_400)
-    _deposits.emit(FakeData.deposits.toList()
-      .map {
-        it.copy(
-          balance = it.balance * Math.random() + 10
-        )
-      }
-    )
+    // delay(5_400)
+    val deposits = productsAPI.fetchDeposit().deposits
+    _deposits.emit(deposits.map {
+      GeneralDeposit(
+        it.depositId,
+        it.balance,
+        "RUB",
+        "Активен",
+        "Накопительный"
+      )
+    })
   }
 
   override fun getTerm(depositId: Long): Flow<DepositTerm> = flow {

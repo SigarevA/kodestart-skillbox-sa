@@ -1,11 +1,12 @@
 @file:Suppress("MatchingDeclarationName") // intentionally contains several provider classes
-package ru.kode.base.internship.core.data.storage
+package ru.kode.base.internship.core.wiring
 
 import android.content.Context
 import com.squareup.sqldelight.android.AndroidSqliteDriver
 import com.squareup.sqldelight.db.SqlDriver
 import com.squareup.sqldelight.logs.LogSqliteDriver
 import ru.kode.base.core.annotations.ApplicationContext
+import ru.kode.base.intership.products.data.ProductsDataBase
 import timber.log.Timber
 import javax.inject.Inject
 import javax.inject.Provider
@@ -17,10 +18,9 @@ internal class InMemoryDatabaseDriverProvider @Inject constructor(
 
   override fun get(): SqlDriver {
     return AndroidSqliteDriver(
-      composeSqlDriverSchemes(),
+      composeSqlDriverSchemes(ProductsDataBase.Schema),
       context,
-      // use in-memory database
-      name = null
+      name = "app-db"
     ).let { driver ->
       if (ENABLE_LOGGING) {
         LogSqliteDriver(driver) { log ->

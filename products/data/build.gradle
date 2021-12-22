@@ -1,8 +1,14 @@
-plugins {
-  id 'com.android.library'
-  id 'kotlin-android'
-  id 'kotlin-parcelize'
-  id 'kotlin-kapt'
+apply plugin: 'com.android.library'
+apply plugin: 'kotlin-android'
+apply plugin: 'kotlin-parcelize'
+apply plugin: 'kotlin-kapt'
+apply plugin: 'com.squareup.sqldelight'
+
+sqldelight {
+  ProductsDataBase {
+    sourceFolders=["db-products"]
+    packageName = "ru.kode.base.intership.products.data"
+  }
 }
 
 android {
@@ -49,6 +55,10 @@ dependencies {
   implementation project(":products:domain")
   implementation project(":card:domain")
   implementation project(":domain:card")
+
+  implementation Deps.sqlDelightAndroidDriver
+  implementation Deps.sqlDelightRxCoroutines
+  implementation Deps.okHttpLoggingInterceptor
 
   kapt Deps.toothpickProcessor
   kapt Deps.moshiProcessor

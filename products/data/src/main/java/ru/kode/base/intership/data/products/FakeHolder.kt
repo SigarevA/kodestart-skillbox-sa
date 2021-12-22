@@ -27,8 +27,8 @@ internal object FakeData {
   )
 
   val cards = mutableListOf(
-    Card(0, "Карта зарплатная", "physical", "7789778977897789", "ACTIVE", "MasterCard", Date(1725107846000)),
-    Card(1, "Дополнительная карта", "physical", "8435843584358435", "DEACTIVATED", "Visa", Date(1725107846000))
+    Card(0, 0, "Карта зарплатная", "physical", "7789778977897789", "ACTIVE", "MasterCard", Date(1725107846000)),
+    Card(1, 0, "Дополнительная карта", "physical", "8435843584358435", "DEACTIVATED", "Visa", Date(1725107846000))
   )
 
   val termsForDeposits = mapOf(
