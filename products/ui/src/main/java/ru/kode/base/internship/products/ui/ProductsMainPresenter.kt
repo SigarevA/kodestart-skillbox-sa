@@ -22,7 +22,7 @@ internal class ProductsMainPresenter @Inject constructor(
     initial = ProductsMainScreen.ViewState() to {
       launch {
         val banks = async {
-          productsUseCase.loadBankAccount(false)
+          productsUseCase.loadBankAccount(true)
         }
         val deposits = async {
           productsUseCase.loadDeposits(false)

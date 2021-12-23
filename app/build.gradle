@@ -58,6 +58,7 @@ android {
 
 dependencies {
   implementation project(":core")
+  implementation project(":core:wiring")
   implementation project(":core:data")
   implementation project(":routing")
   implementation project(":auth:ui")

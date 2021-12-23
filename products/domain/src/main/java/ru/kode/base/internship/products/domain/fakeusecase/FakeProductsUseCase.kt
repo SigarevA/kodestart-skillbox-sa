@@ -20,6 +20,7 @@ import ru.kode.base.internship.products.domain.models.GeneralAccount
 import ru.kode.base.internship.products.domain.repositories.AccountRepository
 import ru.kode.base.internship.products.domain.repositories.CardRepository
 import ru.kode.base.internship.products.domain.repositories.DepositRepository
+import timber.log.Timber
 import javax.inject.Inject
 
 internal class FakeProductsUseCase @Inject constructor(
@@ -45,31 +46,33 @@ internal class FakeProductsUseCase @Inject constructor(
             accounts = accounts.map { it.toAccount() }
           )
         }
-        loadCards(accounts)
+        loadCards(accounts, isRefresh)
       }
       .catch { e ->
         setState { copy(bankAccountState = LceState.Error(e.message)) }
+        Timber.e(e, e.message)
       }
       .launchIn(scope)
-    accountRepository.load()
+    accountRepository.load(isRefresh)
   }
 
-  private fun loadCards(accounts: List<GeneralAccount>) {
+  private suspend fun loadCards(accounts: List<GeneralAccount>, isRefresh: Boolean) {
     accounts.forEach { account ->
       account.cards.forEach { cardId ->
-        cardRepository.cardDetails(cardId)
+        cardRepository.cardDetails(cardId, isRefresh)
           .onEach { card ->
             setState {
               copy(accounts = this.accounts.map {
                 if (it.id == account.id) {
+                  var flag = true
                   val newCards = ArrayList<Card>().apply {
-                    var flag = true
-                    addAll(it.cards
-                      .map { oldCard ->
+                    addAll(
+                      it.cards.map { oldCard ->
                         if (oldCard.id == card.id) {
                           flag = false
                           card
-                        } else oldCard
+                        } else
+                          oldCard
                       }
                     )
                     if (flag)
@@ -88,10 +91,21 @@ internal class FakeProductsUseCase @Inject constructor(
   }
 
   override suspend fun loadDeposits(isRefresh: Boolean) {
-    if (!isRefresh)
-      setState { copy(depositState = LceState.Loading) }
+    setState { copy(depositState = LceState.Loading) }
     try {
-      depositRepository.load()
+      depositRepository.deposits
+        .onEach { deposits ->
+          deposits.forEach { deposit ->
+            depositRepository.getTerm(deposit.id, isRefresh)
+              .onEach {
+
+              }
+              .catch { }
+              .launchIn(scope)
+          }
+        }
+        .launchIn(scope)
+      depositRepository.load(isRefresh)
       setState {
         copy(depositState = LceState.Content)
       }

@@ -1,61 +1,57 @@
 package ru.kode.base.intership.data.products.cards
 
+import com.squareup.sqldelight.runtime.coroutines.asFlow
+import com.squareup.sqldelight.runtime.coroutines.mapToOne
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.map
 import ru.kode.base.internship.domain.Card
 import ru.kode.base.internship.domain.card.repositories.DetailCardRepository
-import ru.kode.base.internship.products.domain.repositories.CardId
 import ru.kode.base.internship.products.domain.repositories.CardRepository
-import ru.kode.base.intership.data.products.FakeData
-import ru.kode.base.intership.data.products.HolderFlows
+import ru.kode.base.intership.data.network.ProductsAPI
+import ru.kode.base.intership.data.products.CardsHolder
+import ru.kode.base.intership.data.products.mappers.toCard
 import ru.kode.base.intership.data.products.mappers.toDomainCard
+import rukodebaseintershipproductsdata.CardEntityQueries
 import timber.log.Timber
 import javax.inject.Inject
 
-internal class CardRepositoryImpl @Inject constructor() : CardRepository, DetailCardRepository {
+internal class CardRepositoryImpl @Inject constructor(
+  private val productsAPI: ProductsAPI,
+  private val queries: CardEntityQueries,
+) : CardRepository, DetailCardRepository {
 
   private val cache: MutableMap<Long, MutableStateFlow<Card>>
-    get() = HolderFlows.cache
+    get() = CardsHolder.cache
 
-  init {
-    Timber.d("create repo")
-  }
-
-  override fun cardDetails(id: CardId): Flow<Card> {
-    Timber.d("cache size : ${cache.size}")
-    return cache[id]?.asStateFlow() ?: run {
-      Timber.d("run cardDetails")
-      val card = FakeData.cards.find { it.id == id } ?: throw IllegalArgumentException()
-      MutableStateFlow(card.toDomainCard()).also {
-        cache[id] = it
-      }.asStateFlow()
+  override suspend fun cardDetails(id: Long, isRefresh: Boolean): Flow<Card> {
+    if (isRefresh) {
+      val card = productsAPI.fetchDetailCard(id).toCard()
+      queries.insertCard(
+        card.id,
+        card.accountId,
+        "ds",
+        card.paymentSystem,
+        card.status,
+        card.name,
+        card.type,
+        card.name
+      )
+    }
+    return queries.getCardByAccountId(id).asFlow().mapToOne().map {
+      Timber.d("card account")
+      it.toDomainCard()
     }
   }
 
-  override fun getCardDetails(id: Long): Flow<Card> {
-    Timber.d("cache size : ${cache.size}")
-    return cache[id]?.asStateFlow() ?: run {
-      Timber.d("run getCardDetails")
-      val card = FakeData.cards.find { it.id == id } ?: throw IllegalArgumentException()
-      MutableStateFlow(card.toDomainCard()).also {
-        cache[id] = it
-      }.asStateFlow()
+
+  override suspend fun getCardDetails(id: Long): Flow<Card> {
+    return queries.getCardByAccountId(id).asFlow().mapToOne().map {
+      it.toDomainCard()
     }
   }
 
   override suspend fun updateCardName(cardId: Long, newName: String) {
-    FakeData.cards.forEachIndexed { i, card ->
-      if (card.id == cardId) {
-        FakeData.cards[i] = card.copy(name = newName)
-        cache[cardId]?.let {
-          Timber.d("new value : ${FakeData.cards[i].toDomainCard()}")
-          it.emit(FakeData.cards[i].toDomainCard())
-        }
-        Timber.d("exit")
-        return
-      }
-    }
-    throw IllegalArgumentException()
+    queries.updateName(newName, cardId)
   }
 }

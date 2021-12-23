@@ -11,5 +11,5 @@ fun GeneralAccount.toAccount(cards: List<Card> = emptyList()): Account =
     balance,
     enumValueOf(currency),
     status,
-    cards
+    emptyList()
   )
