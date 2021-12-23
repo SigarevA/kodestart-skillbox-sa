@@ -25,7 +25,7 @@ internal class ProductsMainPresenter @Inject constructor(
           productsUseCase.loadBankAccount(true)
         }
         val deposits = async {
-          productsUseCase.loadDeposits(false)
+          productsUseCase.loadDeposits(true)
         }
         awaitAll(banks, deposits)
       }

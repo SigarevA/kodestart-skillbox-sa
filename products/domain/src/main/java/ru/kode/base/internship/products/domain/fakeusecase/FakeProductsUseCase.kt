@@ -1,11 +1,12 @@
 package ru.kode.base.internship.products.domain.fakeusecase
 
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flatMapMerge
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
@@ -33,7 +34,10 @@ internal class FakeProductsUseCase @Inject constructor(
   data class State(
     val bankAccountState: LceState = LceState.None,
     val depositState: LceState = LceState.None,
+    val numberOfLoadedCards: Int = 0,
+    val numberOfAllCards: Int = 0,
     val accounts: List<Account> = emptyList(),
+    val cardsState: List<Job> = emptyList(),
   )
 
   override suspend fun loadBankAccount(isRefresh: Boolean) {
@@ -57,43 +61,74 @@ internal class FakeProductsUseCase @Inject constructor(
   }
 
   private suspend fun loadCards(accounts: List<GeneralAccount>, isRefresh: Boolean) {
+    withState { state ->
+      state.cardsState.forEach { it.cancel() }
+    }
+    val accCardJob = ArrayList<Job>()
     accounts.forEach { account ->
       account.cards.forEach { cardId ->
-        cardRepository.cardDetails(cardId, isRefresh)
-          .onEach { card ->
-            setState {
-              copy(accounts = this.accounts.map {
-                if (it.id == account.id) {
-                  var flag = true
-                  val newCards = ArrayList<Card>().apply {
-                    addAll(
-                      it.cards.map { oldCard ->
-                        if (oldCard.id == card.id) {
-                          flag = false
-                          card
-                        } else
-                          oldCard
-                      }
-                    )
-                    if (flag)
-                      add(card)
-                  }
-                  it.copy(cards = newCards)
-                } else
-                  it
-              }
-              )
-            }
-          }
-          .launchIn(scope)
+        accCardJob.add(processCard(account.id, cardId, isRefresh))
       }
     }
+    setState {
+      copy(cardsState = accCardJob)
+    }
+  }
+
+  private suspend fun processCard(accountId: Long, cardId: Long, isRefresh: Boolean): Job {
+    return cardRepository.cardDetails(cardId, isRefresh)
+      .onEach { card ->
+        var flag = true
+        setState {
+          copy(accounts = this.accounts
+            .map {
+              if (it.id == accountId) {
+                val newCards = ArrayList<Card>().apply {
+                  addAll(
+                    it.cards.map { oldCard ->
+                      if (oldCard.id == card.id) {
+                        flag = false
+                        card
+                      } else
+                        oldCard
+                    }
+                  )
+                  if (flag)
+                    add(card)
+                }
+                it.copy(cards = newCards)
+              } else
+                it
+            },
+            numberOfLoadedCards = numberOfLoadedCards + if (flag) 1 else 0
+          )
+        }
+      }
+      .launchIn(scope)
   }
 
   override suspend fun loadDeposits(isRefresh: Boolean) {
     setState { copy(depositState = LceState.Loading) }
     try {
+      /*
       depositRepository.deposits
+        .map {
+          it.asFlow()
+            .flatMapMerge { deposit ->
+              depositRepository.getTerm(deposit.id).map { term ->
+                Deposit(
+                  deposit.id,
+                  deposit.balance,
+                  enumValueOf(deposit.currency),
+                  deposit.status,
+                  deposit.name,
+                  term.rate,
+                  term.closeDate
+                )
+              }
+            }.toList()
+        }
+
         .onEach { deposits ->
           deposits.forEach { deposit ->
             depositRepository.getTerm(deposit.id, isRefresh)
@@ -104,7 +139,7 @@ internal class FakeProductsUseCase @Inject constructor(
               .launchIn(scope)
           }
         }
-        .launchIn(scope)
+        .launchIn(scope)*/
       depositRepository.load(isRefresh)
       setState {
         copy(depositState = LceState.Content)
@@ -123,20 +158,22 @@ internal class FakeProductsUseCase @Inject constructor(
     get() = stateFlow.map { it.accounts }.distinctUntilChanged()
 
   override val depositsFlow: Flow<List<Deposit>>
-    get() = depositRepository.deposits.map { deposits ->
-      deposits.asFlow()
-        .map { deposit ->
-          val term = depositRepository.getTerm(deposit.id).first()
-          Deposit(
-            deposit.id,
-            deposit.balance,
-            enumValueOf(deposit.currency),
-            deposit.status,
-            deposit.name,
-            term.rate,
-            term.closeDate
-          )
-        }
-        .toList()
-    }
+    get() = depositRepository.deposits
+      .map {
+        Timber.d(" map orerator , load deposit , deposit size : ${it.size}")
+        it.asFlow()
+          .flatMapMerge { deposit ->
+            depositRepository.getTerm(deposit.id).map { term ->
+              Deposit(
+                deposit.id,
+                deposit.balance,
+                enumValueOf(deposit.currency),
+                deposit.status,
+                deposit.name,
+                term.rate,
+                term.closeDate
+              )
+            }
+          }.toList()
+      }
 }

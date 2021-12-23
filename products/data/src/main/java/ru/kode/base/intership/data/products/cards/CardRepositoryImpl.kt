@@ -25,8 +25,10 @@ internal class CardRepositoryImpl @Inject constructor(
     get() = CardsHolder.cache
 
   override suspend fun cardDetails(id: Long, isRefresh: Boolean): Flow<Card> {
+    Timber.d("call cardDetails with id : ${id}")
     if (isRefresh) {
-      val card = productsAPI.fetchDetailCard(id).toCard()
+      Timber.d("call cardDetails with id : ${id}")
+      val card = productsAPI.fetchDetailCard(id, "android-$id").toCard()
       queries.insertCard(
         card.id,
         card.accountId,
@@ -37,8 +39,10 @@ internal class CardRepositoryImpl @Inject constructor(
         card.type,
         card.name
       )
+      Timber.d("save call cardDetails with id : ${card}")
     }
-    return queries.getCardByAccountId(id).asFlow().mapToOne().map {
+    Timber.d("return save call cardDetails with id")
+    return queries.getCardById(id).asFlow().mapToOne().map {
       Timber.d("card account")
       it.toDomainCard()
     }
@@ -46,7 +50,7 @@ internal class CardRepositoryImpl @Inject constructor(
 
 
   override suspend fun getCardDetails(id: Long): Flow<Card> {
-    return queries.getCardByAccountId(id).asFlow().mapToOne().map {
+    return queries.getCardById(id).asFlow().mapToOne().map {
       it.toDomainCard()
     }
   }

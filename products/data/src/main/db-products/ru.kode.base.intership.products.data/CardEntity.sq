@@ -21,6 +21,12 @@ FROM CardEntity
 WHERE accountId = :id
 ;
 
+getCardById:
+SELECT *
+FROM CardEntity
+WHERE id = :id
+;
+
 updateName:
 UPDATE CardEntity
 SET name =:newName

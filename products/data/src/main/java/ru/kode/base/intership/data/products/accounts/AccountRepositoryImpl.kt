@@ -22,18 +22,19 @@ internal class AccountRepositoryImpl @Inject constructor(
   private val queries = db.accountEntityQueries
 
   private val _accounts: MutableSharedFlow<List<GeneralAccount>> = MutableSharedFlow()
-  private val asd = queries.getAllAccount().asFlow().mapToList().map {
-    it.map {
-      GeneralAccount(
-        it.id,
-        it.numberAccount,
-        it.balance,
-        it.currency,
-        it.status,
-        listOf(0)
-      )
+  private val asd = queries.getAllAccount().asFlow()
+    .mapToList().map {
+      it.map {
+        GeneralAccount(
+          it.id,
+          it.numberAccount,
+          it.balance,
+          it.currency,
+          it.status,
+          db.cardInAccountQueries.getAllAccount(it.id, mapper = { _, cardId -> cardId }).executeAsList()
+        )
+      }
     }
-  }
 
   override val accounts: Flow<List<GeneralAccount>>
     get() = _accounts.asSharedFlow()
@@ -54,6 +55,9 @@ internal class AccountRepositoryImpl @Inject constructor(
             account.currency,
             account.status
           )
+          account.cards.forEach { card ->
+            db.cardInAccountQueries.insertCardInAccount(account.accountId, card.cardId)
+          }
         }
       }
     }

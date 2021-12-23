@@ -8,7 +8,7 @@ import ru.kode.base.internship.domain.Card
 @JsonClass(generateAdapter = true)
 class CardInAccountResponse(
   @Json(name = "card_id")
-  val cardId: String,
+  val cardId: Long,
   val number: String,
   val status: Card.Status,
   val name: String,

@@ -11,6 +11,7 @@ import ru.kode.base.internship.products.domain.models.GeneralDeposit
 import ru.kode.base.internship.products.domain.repositories.DepositRepository
 import ru.kode.base.intership.data.network.ProductsAPI
 import ru.kode.base.intership.products.data.ProductsDataBase
+import timber.log.Timber
 import java.util.Date
 import javax.inject.Inject
 
@@ -39,7 +40,9 @@ internal class DepositRepositoryImpl @Inject constructor(
 
   override suspend fun load(isRefresh: Boolean) {
     if (isRefresh) {
+      Timber.d("load deposit")
       val deposits = productsAPI.fetchDeposit().deposits
+      Timber.d("load deposit , deposit size : ${deposits.size}")
       depositEntityQueries.transaction {
         deposits.forEach {
           depositEntityQueries.insertDeposit(
@@ -54,15 +57,9 @@ internal class DepositRepositoryImpl @Inject constructor(
     }
   }
 
-  override suspend fun getTerm(depositId: Long, isRefresh: Boolean): Flow<DepositTerm> {
-    if (isRefresh) {
-      val term = productsAPI.fetchDepositTerms(depositId)
-      term?.let {
-        depositTermsQueries.insertDepositTerm(depositId, 3213, it.rate)
-      } ?: run {
-        depositTermsQueries.insertDepositTerm(depositId, 321233213, 11.1)
-      }
-    }
+  override suspend fun getTerm(depositId: Long): Flow<DepositTerm> {
+    val term = productsAPI.fetchDepositTerms(depositId)
+    depositTermsQueries.insertDepositTerm(depositId, 321233213, 11.1)
     return depositTermsQueries.getDepositTermByDepositID(depositId,
       mapper = { _, _, rate -> DepositTerm(Date(321), rate.toFloat()) })
       .asFlow()
