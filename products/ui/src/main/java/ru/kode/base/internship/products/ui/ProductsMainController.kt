@@ -1,10 +1,12 @@
 package ru.kode.base.internship.products.ui
 
+import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.InfiniteRepeatableSpec
 import androidx.compose.animation.core.InfiniteTransition
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
@@ -35,6 +37,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
@@ -61,6 +64,7 @@ import ru.kode.base.internship.products.ui.core.uikit.theme.AppTheme
 import ru.kode.base.internship.products.utils.drawable
 import ru.kode.base.internship.products.utils.icon
 import ru.kode.base.internship.products.utils.stringId
+import timber.log.Timber
 import java.text.DecimalFormat
 import java.text.SimpleDateFormat
 import java.util.Locale
@@ -76,6 +80,7 @@ internal class ProductsMainController :
 
   @Composable
   override fun ScreenContent(state: ProductsMainScreen.ViewState) {
+    Timber.d("state : $state")
     val transition = rememberInfiniteTransition()
     val animationSpec = infiniteRepeatable<Float>(
       tween(durationMillis = 1200, easing = LinearEasing),
@@ -107,7 +112,7 @@ internal class ProductsMainController :
         }
       ) {
         LazyColumn {
-          if (state.depositsLceState == LceState.Loading && state.bankAccountsLceState == LceState.Loading && !state.isRefresh)
+          if (state.depositsLceState == LceState.Loading && state.bankAccountsLceState == LceState.Loading)
             item {
               Spacer(modifier = Modifier.height(50.dp))
               LoadingHeader(
@@ -121,7 +126,7 @@ internal class ProductsMainController :
             item {
               ScreenHeader()
             }
-          if (state.bankAccountsLceState == LceState.Loading && !state.isRefreshAccount)
+          if (state.bankAccountsLceState == LceState.Loading)
             item {
               LoadingBlock(transition, animationSpec, stopLists)
             }
@@ -133,7 +138,7 @@ internal class ProductsMainController :
                 }
                 bankinfo.bankAccounts.forEachIndexed { i, bankAccount ->
                   item {
-                    BankAccount(bankAccount = bankAccount, i)
+                    BankAccount(bankAccount = bankAccount, i, bankinfo.expandBankAccounts[i])
                   }
                   if (bankinfo.expandBankAccounts[i])
                     bankAccount.cards.forEach { card ->
@@ -147,7 +152,7 @@ internal class ProductsMainController :
           item {
             Spacer(modifier = Modifier.height(11.dp))
           }
-          if (state.depositsLceState == LceState.Loading && !state.isRefreshDeposit)
+          if (state.depositsLceState == LceState.Loading)
             item { LoadingBlock(transition, animationSpec, stopLists) }
           if (state.depositsLceState == LceState.Content)
             state.deposits?.let { deposits ->
@@ -288,7 +293,7 @@ internal class ProductsMainController :
   }
 
   @Composable
-  fun BankAccount(bankAccount: Account, pos: Int) {
+  fun BankAccount(bankAccount: Account, pos: Int, isOpenDetail: Boolean) {
     val balanceValue = remember(key1 = bankAccount) {
       (DecimalFormat.getInstance(Locale("ru")) as DecimalFormat).let {
         it.applyPattern("#,###,###.00")
@@ -296,10 +301,13 @@ internal class ProductsMainController :
       }
     }
 
-//3 719,19 $
-    // 1 513,62 €
-    // 1 515 000,78 ₽
-    // 457 334,00 ₽
+    val angle: Float by animateFloatAsState(
+      targetValue = if (isOpenDetail) 0F else -180F,
+      animationSpec = tween(
+        durationMillis = 400,
+        easing = FastOutSlowInEasing
+      )
+    )
 
     Surface(
       color = AppTheme.colors.backgroundSecondary,
@@ -343,7 +351,10 @@ internal class ProductsMainController :
           Icon(
             painter = painterResource(id = R.drawable.ic_expand),
             contentDescription = "Знак монеты",
-            modifier = Modifier.padding(horizontal = 15.dp, vertical = 11.dp)
+            modifier = Modifier
+              .padding(horizontal = 15.dp, vertical = 11.dp)
+              .rotate(angle)
+
           )
         }
       }

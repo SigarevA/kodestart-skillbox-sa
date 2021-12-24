@@ -14,3 +14,9 @@ insertAccount:
 INSERT OR REPLACE
 INTO AccountEntity
 VALUES (?, ?, ?, ?, ?);
+
+updateBalance:
+UPDATE AccountEntity
+SET balance =:balance
+WHERE id =:id
+;

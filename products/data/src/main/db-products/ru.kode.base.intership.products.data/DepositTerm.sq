@@ -1,5 +1,5 @@
 CREATE TABLE DepositTerm (
-    depositID INTEGER NOT NULL,
+    depositID INTEGER NOT NULL PRIMARY KEY,
     closeDate INTEGER NOT NULL,
     rate REAL NOT NULL,
     FOREIGN KEY (depositID) REFERENCES DepositEntity(id)

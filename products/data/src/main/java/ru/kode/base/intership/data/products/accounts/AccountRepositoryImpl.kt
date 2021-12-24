@@ -4,9 +4,9 @@ import com.squareup.sqldelight.runtime.coroutines.asFlow
 import com.squareup.sqldelight.runtime.coroutines.mapToList
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.take
 import ru.kode.base.internship.products.domain.models.GeneralAccount
 import ru.kode.base.internship.products.domain.repositories.AccountRepository
 import ru.kode.base.intership.data.network.ProductsAPI
@@ -37,10 +37,10 @@ internal class AccountRepositoryImpl @Inject constructor(
     }
 
   override val accounts: Flow<List<GeneralAccount>>
-    get() = _accounts.asSharedFlow()
+    get() = asd
 
   override suspend fun load(isRefresh: Boolean) {
-    if (isRefresh) {
+    if (!isRefresh) {
       Timber.d("insert accounts load")
       val accounts = productsAPI.fetchAccounts().accounts
       queries.transaction {
@@ -60,11 +60,18 @@ internal class AccountRepositoryImpl @Inject constructor(
           }
         }
       }
+    } else {
+      queries.getAllAccount().asFlow()
+        .mapToList()
+        .take(1)
+        .collect {
+          it.forEach {
+            queries.transaction {
+              queries.updateBalance((Math.random() * 1_000_000) + 500_00, it.id)
+            }
+          }
+        }
     }
-    asd.collect {
-      Timber.d("collect accounts")
-      Timber.d("check size ${it.size}")
-      _accounts.emit(it)
-    }
+
   }
 }

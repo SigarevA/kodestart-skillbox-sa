@@ -2,8 +2,6 @@ package ru.kode.base.internship.products.ui
 
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
-import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.launch
 import ru.dimsuz.unicorn.coroutines.MachineDsl
 import ru.kode.base.core.coroutine.BasePresenter
@@ -22,10 +20,10 @@ internal class ProductsMainPresenter @Inject constructor(
     initial = ProductsMainScreen.ViewState() to {
       launch {
         val banks = async {
-          productsUseCase.loadBankAccount(true)
+          productsUseCase.loadBankAccount(false)
         }
         val deposits = async {
-          productsUseCase.loadDeposits(true)
+          productsUseCase.loadDeposits(false)
         }
         awaitAll(banks, deposits)
       }
@@ -67,10 +65,10 @@ internal class ProductsMainPresenter @Inject constructor(
         if (newState.isRefresh) {
           executeAsync {
             val banks = async {
-              productsUseCase.loadBankAccount(newState.bankAccountsLceState == LceState.Content)
+              productsUseCase.loadBankAccount(true)
             }
             val deposits = async {
-              productsUseCase.loadDeposits(newState.depositsLceState == LceState.Content)
+              productsUseCase.loadDeposits(true)
             }
             awaitAll(banks, deposits)
           }
@@ -81,7 +79,7 @@ internal class ProductsMainPresenter @Inject constructor(
     onEach(productsUseCase.accountState) {
       transitionTo { state, payload ->
         if (payload.isComplete && state.isRefreshAccount)
-          state.copy(depositsLceState = payload, isRefreshAccount = false)
+          state.copy(bankAccountsLceState = payload, isRefreshAccount = false)
         else
           state.copy(bankAccountsLceState = payload)
       }
@@ -103,7 +101,7 @@ internal class ProductsMainPresenter @Inject constructor(
             bankAccounts = ProductsMainScreen.BankAccountInfo(
               accounts, ArrayList<Boolean>().apply {
                 repeat(accounts.size) {
-                  add(true)
+                  add(false)
                 }
               }
             ),

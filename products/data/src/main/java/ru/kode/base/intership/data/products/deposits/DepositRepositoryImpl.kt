@@ -39,7 +39,7 @@ internal class DepositRepositoryImpl @Inject constructor(
     get() = allDeposits
 
   override suspend fun load(isRefresh: Boolean) {
-    if (isRefresh) {
+    if (!isRefresh) {
       Timber.d("load deposit")
       val deposits = productsAPI.fetchDeposit().deposits
       Timber.d("load deposit , deposit size : ${deposits.size}")
@@ -48,29 +48,23 @@ internal class DepositRepositoryImpl @Inject constructor(
           depositEntityQueries.insertDeposit(
             it.depositId,
             it.balance,
-            "RUB",
-            "Активен",
-            "Накопительный"
+            it.currency,
+            it.status,
+            it.name
           )
         }
       }
     }
   }
 
-  override suspend fun getTerm(depositId: Long): Flow<DepositTerm> {
-    val term = productsAPI.fetchDepositTerms(depositId)
-    depositTermsQueries.insertDepositTerm(depositId, 321233213, 11.1)
+  override suspend fun getTerm(depositId: Long, isRefresh: Boolean): Flow<DepositTerm> {
+    if (!isRefresh) {
+      val term = productsAPI.fetchDepositTerms(depositId, "android-$depositId")
+      depositTermsQueries.insertDepositTerm(depositId, 321233213, term.rate)
+    }
     return depositTermsQueries.getDepositTermByDepositID(depositId,
-      mapper = { _, _, rate -> DepositTerm(Date(321), rate.toFloat()) })
+      mapper = { _, _, rate -> DepositTerm(Date(321), rate.toFloat() + (Math.random() * 7.0f).toFloat()) })
       .asFlow()
       .mapToOne()
   }
-
-  /*flow {
-    val term = FakeData.termsForDeposits[depositId] ?: throw IllegalArgumentException()
-    val r = (Math.random() * 6) + 6
-    emit(term.copy(rate = r.toFloat()))
-  }
-
-   */
 }

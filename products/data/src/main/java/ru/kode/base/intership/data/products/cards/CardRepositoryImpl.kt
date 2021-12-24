@@ -26,7 +26,7 @@ internal class CardRepositoryImpl @Inject constructor(
 
   override suspend fun cardDetails(id: Long, isRefresh: Boolean): Flow<Card> {
     Timber.d("call cardDetails with id : ${id}")
-    if (isRefresh) {
+    if (!isRefresh) {
       Timber.d("call cardDetails with id : ${id}")
       val card = productsAPI.fetchDetailCard(id, "android-$id").toCard()
       queries.insertCard(

@@ -3,33 +3,32 @@ package ru.kode.base.internship.products.domain.fakeusecase
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.flatMapMerge
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.flow.toList
 import ru.kode.base.internship.core.domain.BaseUseCase
 import ru.kode.base.internship.core.domain.entity.LceState
 import ru.kode.base.internship.domain.Card
 import ru.kode.base.internship.products.domain.mappers.toAccount
+import ru.kode.base.internship.products.domain.mappers.toDomainDeposit
 import ru.kode.base.internship.products.domain.models.Account
 import ru.kode.base.internship.products.domain.models.Deposit
 import ru.kode.base.internship.products.domain.models.GeneralAccount
+import ru.kode.base.internship.products.domain.models.GeneralDeposit
 import ru.kode.base.internship.products.domain.repositories.AccountRepository
 import ru.kode.base.internship.products.domain.repositories.CardRepository
 import ru.kode.base.internship.products.domain.repositories.DepositRepository
 import timber.log.Timber
 import javax.inject.Inject
 
-internal class FakeProductsUseCase @Inject constructor(
+internal class ProductsUseCaseImpl @Inject constructor(
   private val accountRepository: AccountRepository,
   private val depositRepository: DepositRepository,
   private val cardRepository: CardRepository,
   private val scope: CoroutineScope,
-) : BaseUseCase<FakeProductsUseCase.State>(scope, State()), ProductsUseCase {
+) : BaseUseCase<ProductsUseCaseImpl.State>(scope, State()), ProductsUseCase {
 
   data class State(
     val bankAccountState: LceState = LceState.None,
@@ -37,12 +36,20 @@ internal class FakeProductsUseCase @Inject constructor(
     val numberOfLoadedCards: Int = 0,
     val numberOfAllCards: Int = 0,
     val accounts: List<Account> = emptyList(),
+    val deposits: List<Deposit> = emptyList(),
+    val accountJob: Job? = null,
+    val depositJob: Job? = null,
+    val terms: List<Job> = emptyList(),
     val cardsState: List<Job> = emptyList(),
   )
 
   override suspend fun loadBankAccount(isRefresh: Boolean) {
+    Timber.d("as")
     setState { copy(bankAccountState = LceState.Loading) }
-    accountRepository.accounts
+    withState {
+      it.accountJob?.cancel()
+    }
+    val job = accountRepository.accounts
       .onEach { accounts ->
         setState {
           copy(
@@ -57,6 +64,9 @@ internal class FakeProductsUseCase @Inject constructor(
         Timber.e(e, e.message)
       }
       .launchIn(scope)
+    setState {
+      copy(accountJob = job)
+    }
     accountRepository.load(isRefresh)
   }
 
@@ -100,7 +110,8 @@ internal class FakeProductsUseCase @Inject constructor(
               } else
                 it
             },
-            numberOfLoadedCards = numberOfLoadedCards + if (flag) 1 else 0
+            numberOfLoadedCards = numberOfLoadedCards + if (flag) 1 else 0,
+            bankAccountState = LceState.Content
           )
         }
       }
@@ -110,42 +121,59 @@ internal class FakeProductsUseCase @Inject constructor(
   override suspend fun loadDeposits(isRefresh: Boolean) {
     setState { copy(depositState = LceState.Loading) }
     try {
-      /*
       depositRepository.deposits
-        .map {
-          it.asFlow()
-            .flatMapMerge { deposit ->
-              depositRepository.getTerm(deposit.id).map { term ->
-                Deposit(
-                  deposit.id,
-                  deposit.balance,
-                  enumValueOf(deposit.currency),
-                  deposit.status,
-                  deposit.name,
-                  term.rate,
-                  term.closeDate
-                )
-              }
-            }.toList()
-        }
-
-        .onEach { deposits ->
-          deposits.forEach { deposit ->
-            depositRepository.getTerm(deposit.id, isRefresh)
-              .onEach {
-
-              }
-              .catch { }
-              .launchIn(scope)
+        .onEach {
+          setState {
+            copy(depositState = LceState.Content)
           }
+          processLoadDepositTerms(it, isRefresh)
         }
-        .launchIn(scope)*/
+        .launchIn(scope)
       depositRepository.load(isRefresh)
-      setState {
-        copy(depositState = LceState.Content)
-      }
     } catch (e: Exception) {
       setState { copy(depositState = LceState.Error(e.message)) }
+    }
+  }
+
+  private suspend fun processLoadDepositTerms(deposits: List<GeneralDeposit>, isRefresh: Boolean) {
+    withState { state ->
+      state.terms.forEach { job -> job.cancel() }
+    }
+    val termsHolder = ArrayList<Job>(deposits.size)
+    deposits.forEach { deposit ->
+      termsHolder.add(
+        depositRepository.getTerm(deposit.id, isRefresh)
+          .onEach { depositTerm ->
+            val newDeposits = withState { state ->
+              var isAdd = true
+              val result = state.deposits.map {
+                if (it.id == deposit.id) {
+                  isAdd = false
+                  it.copy(rate = depositTerm.rate, closeDate = depositTerm.closeDate)
+                } else
+                  it
+              }.let {
+                if (isAdd)
+                  it.plus(deposit.toDomainDeposit(depositTerm))
+                else
+                  it
+              }
+              result
+            }
+            setState {
+              copy(deposits = newDeposits)
+            }
+          }
+          .catch { e ->
+            setState {
+              copy(depositState = LceState.Error(e.message))
+            }
+          }
+          .launchIn(scope)
+      )
+    }
+    setState {
+      copy(terms = termsHolder)
     }
   }
 
@@ -158,22 +186,5 @@ internal class FakeProductsUseCase @Inject constructor(
     get() = stateFlow.map { it.accounts }.distinctUntilChanged()
 
   override val depositsFlow: Flow<List<Deposit>>
-    get() = depositRepository.deposits
-      .map {
-        Timber.d(" map orerator , load deposit , deposit size : ${it.size}")
-        it.asFlow()
-          .flatMapMerge { deposit ->
-            depositRepository.getTerm(deposit.id).map { term ->
-              Deposit(
-                deposit.id,
-                deposit.balance,
-                enumValueOf(deposit.currency),
-                deposit.status,
-                deposit.name,
-                term.rate,
-                term.closeDate
-              )
-            }
-          }.toList()
-      }
+    get() = stateFlow.map { it.deposits }.distinctUntilChanged()
 }
