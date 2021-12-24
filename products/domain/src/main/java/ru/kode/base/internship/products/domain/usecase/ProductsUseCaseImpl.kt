@@ -1,4 +1,4 @@
-package ru.kode.base.internship.products.domain.fakeusecase
+package ru.kode.base.internship.products.domain.usecase
 
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job

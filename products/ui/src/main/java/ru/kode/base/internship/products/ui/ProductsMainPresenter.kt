@@ -6,7 +6,7 @@ import kotlinx.coroutines.launch
 import ru.dimsuz.unicorn.coroutines.MachineDsl
 import ru.kode.base.core.coroutine.BasePresenter
 import ru.kode.base.internship.core.domain.entity.LceState
-import ru.kode.base.internship.products.domain.fakeusecase.ProductsUseCase
+import ru.kode.base.internship.products.domain.usecase.ProductsUseCase
 import ru.kode.base.internship.routing.AppFlow
 import javax.inject.Inject
 

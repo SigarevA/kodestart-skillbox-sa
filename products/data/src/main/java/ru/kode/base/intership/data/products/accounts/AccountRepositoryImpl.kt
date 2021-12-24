@@ -11,7 +11,6 @@ import ru.kode.base.internship.products.domain.models.GeneralAccount
 import ru.kode.base.internship.products.domain.repositories.AccountRepository
 import ru.kode.base.intership.data.network.ProductsAPI
 import ru.kode.base.intership.products.data.ProductsDataBase
-import timber.log.Timber
 import javax.inject.Inject
 
 internal class AccountRepositoryImpl @Inject constructor(
@@ -41,13 +40,9 @@ internal class AccountRepositoryImpl @Inject constructor(
 
   override suspend fun load(isRefresh: Boolean) {
     if (!isRefresh) {
-      Timber.d("insert accounts load")
       val accounts = productsAPI.fetchAccounts().accounts
       queries.transaction {
-        Timber.d("insert accounts")
-        Timber.d("insert accounts size : ${accounts.size}")
         accounts.forEach { account ->
-          Timber.d("insert account : ${account}")
           queries.insertAccount(
             account.accountId,
             account.number,

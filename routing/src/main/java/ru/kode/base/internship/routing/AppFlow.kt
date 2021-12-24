@@ -6,7 +6,7 @@ import ru.kode.base.core.routing.coordinator.FlowCoordinator
 import ru.kode.base.internship.auth.domain.di.AuthDataModule
 import ru.kode.base.internship.auth.domain.di.AuthDomainModule
 import ru.kode.base.internship.domain.card.di.DetailCardDomainModule
-import ru.kode.base.internship.products.domain.di.ProductsFakeDomainModule
+import ru.kode.base.internship.products.domain.di.ProductsDomainModule
 import ru.kode.base.intership.data.di.ProductsDataModule
 
 interface AppFlow {
@@ -17,7 +17,7 @@ interface AppFlow {
         AppFlowModule(),
         AuthDataModule(),
         AuthDomainModule(),
-        ProductsFakeDomainModule(),
+        ProductsDomainModule(),
         ProductsDataModule(),
         DetailCardDomainModule()
         ),

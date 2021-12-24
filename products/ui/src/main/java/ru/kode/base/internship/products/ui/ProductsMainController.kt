@@ -64,7 +64,6 @@ import ru.kode.base.internship.products.ui.core.uikit.theme.AppTheme
 import ru.kode.base.internship.products.utils.drawable
 import ru.kode.base.internship.products.utils.icon
 import ru.kode.base.internship.products.utils.stringId
-import timber.log.Timber
 import java.text.DecimalFormat
 import java.text.SimpleDateFormat
 import java.util.Locale
@@ -80,7 +79,6 @@ internal class ProductsMainController :
 
   @Composable
   override fun ScreenContent(state: ProductsMainScreen.ViewState) {
-    Timber.d("state : $state")
     val transition = rememberInfiniteTransition()
     val animationSpec = infiniteRepeatable<Float>(
       tween(durationMillis = 1200, easing = LinearEasing),
@@ -730,7 +728,6 @@ fun LoadingBlock(
     }
   }
 }
-
 
 @Immutable
 data class ShimmerOffset(

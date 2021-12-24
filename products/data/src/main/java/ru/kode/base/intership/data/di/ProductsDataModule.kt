@@ -11,6 +11,8 @@ import ru.kode.base.intership.data.products.deposits.DepositRepositoryImpl
 import ru.kode.base.intership.products.data.ProductsDataBase
 import rukodebaseintershipproductsdata.CardEntityQueries
 import toothpick.config.Module
+import java.text.DateFormat
+import java.text.SimpleDateFormat
 
 class ProductsDataModule : Module() {
   init {
@@ -41,5 +43,20 @@ class ProductsDataModule : Module() {
     bind(CardEntityQueries::class.java)
       .toProvider(CardQueriesProvider::class.java)
       .singletonInScope()
+
+    bind(SimpleDateFormat::class.java)
+      .withName(SIMPLE_DATE_TERM)
+      .toProvider(TermDateProvider::class.java)
+      .singletonInScope()
+
+    bind(DateFormat::class.java)
+      .withName(SIMPLE_DATE_CARD)
+      .toProvider(CardDateProvider::class.java)
+      .singletonInScope()
+  }
+
+  companion object {
+    internal const val SIMPLE_DATE_TERM = "DateTermDeposit"
+    internal const val SIMPLE_DATE_CARD = "DateCard"
   }
 }
