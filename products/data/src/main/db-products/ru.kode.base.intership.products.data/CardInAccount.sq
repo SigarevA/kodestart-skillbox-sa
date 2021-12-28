@@ -1,0 +1,17 @@
+CREATE TABLE CardInAccount (
+    accountId Integer NOT NULL,
+    cardId INTEGER NOT NULL,
+    PRIMARY KEY (cardId, accountId)
+);
+
+
+getAllAccount:
+SELECT *
+FROM CardInAccount
+WHERE accountId =:accId
+;
+
+insertCardInAccount:
+INSERT OR REPLACE
+INTO CardInAccount
+VALUES (?, ?);

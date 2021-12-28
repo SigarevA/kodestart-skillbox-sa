@@ -4,6 +4,7 @@ import android.content.Context
 import coil.ImageLoader
 import okhttp3.OkHttpClient
 import ru.kode.base.core.annotations.ApplicationContext
+import ru.kode.base.internship.core.wiring.StorageBindings
 import ru.kode.base.internship.core.data.di.DataBindings
 import toothpick.config.Module
 import javax.inject.Inject
@@ -14,7 +15,7 @@ internal class KodeApplicationModule(application: KodeApplication) : Module() {
     bind(Context::class.java).withName(ApplicationContext::class.java).toInstance(application)
     bind(KodeApplication::class.java).toInstance(application)
     bind(ImageLoader::class.java).toProvider(ImageLoaderProvider::class.java).providesSingletonInScope()
-
+    StorageBindings.bindInto(this)
     DataBindings.bindInto(this)
   }
 }

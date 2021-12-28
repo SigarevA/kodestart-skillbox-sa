@@ -6,7 +6,7 @@ import kotlinx.coroutines.launch
 import ru.dimsuz.unicorn.coroutines.MachineDsl
 import ru.kode.base.core.coroutine.BasePresenter
 import ru.kode.base.internship.core.domain.entity.LceState
-import ru.kode.base.internship.products.domain.fakeusecase.ProductsUseCase
+import ru.kode.base.internship.products.domain.usecase.ProductsUseCase
 import ru.kode.base.internship.routing.AppFlow
 import javax.inject.Inject
 
@@ -65,10 +65,10 @@ internal class ProductsMainPresenter @Inject constructor(
         if (newState.isRefresh) {
           executeAsync {
             val banks = async {
-              productsUseCase.loadBankAccount(newState.bankAccountsLceState == LceState.Content)
+              productsUseCase.loadBankAccount(true)
             }
             val deposits = async {
-              productsUseCase.loadDeposits(newState.depositsLceState == LceState.Content)
+              productsUseCase.loadDeposits(true)
             }
             awaitAll(banks, deposits)
           }
@@ -79,7 +79,7 @@ internal class ProductsMainPresenter @Inject constructor(
     onEach(productsUseCase.accountState) {
       transitionTo { state, payload ->
         if (payload.isComplete && state.isRefreshAccount)
-          state.copy(depositsLceState = payload, isRefreshAccount = false)
+          state.copy(bankAccountsLceState = payload, isRefreshAccount = false)
         else
           state.copy(bankAccountsLceState = payload)
       }
@@ -101,7 +101,7 @@ internal class ProductsMainPresenter @Inject constructor(
             bankAccounts = ProductsMainScreen.BankAccountInfo(
               accounts, ArrayList<Boolean>().apply {
                 repeat(accounts.size) {
-                  add(true)
+                  add(false)
                 }
               }
             ),

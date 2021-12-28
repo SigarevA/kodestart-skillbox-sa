@@ -1,10 +1,12 @@
 package ru.kode.base.internship.products.ui
 
+import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.InfiniteRepeatableSpec
 import androidx.compose.animation.core.InfiniteTransition
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
@@ -35,6 +37,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
@@ -133,7 +136,7 @@ internal class ProductsMainController :
                 }
                 bankinfo.bankAccounts.forEachIndexed { i, bankAccount ->
                   item {
-                    BankAccount(bankAccount = bankAccount, i)
+                    BankAccount(bankAccount = bankAccount, i, bankinfo.expandBankAccounts[i])
                   }
                   if (bankinfo.expandBankAccounts[i])
                     bankAccount.cards.forEach { card ->
@@ -288,7 +291,7 @@ internal class ProductsMainController :
   }
 
   @Composable
-  fun BankAccount(bankAccount: Account, pos: Int) {
+  fun BankAccount(bankAccount: Account, pos: Int, isOpenDetail: Boolean) {
     val balanceValue = remember(key1 = bankAccount) {
       (DecimalFormat.getInstance(Locale("ru")) as DecimalFormat).let {
         it.applyPattern("#,###,###.00")
@@ -296,10 +299,13 @@ internal class ProductsMainController :
       }
     }
 
-//3 719,19 $
-    // 1 513,62 €
-    // 1 515 000,78 ₽
-    // 457 334,00 ₽
+    val angle: Float by animateFloatAsState(
+      targetValue = if (isOpenDetail) 0F else -180F,
+      animationSpec = tween(
+        durationMillis = 400,
+        easing = FastOutSlowInEasing
+      )
+    )
 
     Surface(
       color = AppTheme.colors.backgroundSecondary,
@@ -343,7 +349,10 @@ internal class ProductsMainController :
           Icon(
             painter = painterResource(id = R.drawable.ic_expand),
             contentDescription = "Знак монеты",
-            modifier = Modifier.padding(horizontal = 15.dp, vertical = 11.dp)
+            modifier = Modifier
+              .padding(horizontal = 15.dp, vertical = 11.dp)
+              .rotate(angle)
+
           )
         }
       }
@@ -719,7 +728,6 @@ fun LoadingBlock(
     }
   }
 }
-
 
 @Immutable
 data class ShimmerOffset(

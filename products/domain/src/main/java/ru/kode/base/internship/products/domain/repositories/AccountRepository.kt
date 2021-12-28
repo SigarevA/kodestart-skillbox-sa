@@ -7,5 +7,5 @@ import ru.kode.base.internship.products.domain.models.GeneralAccount
 interface AccountRepository {
   val accounts: Flow<List<GeneralAccount>>
 
-  suspend fun load()
+  suspend fun load(isRefresh: Boolean)
 }

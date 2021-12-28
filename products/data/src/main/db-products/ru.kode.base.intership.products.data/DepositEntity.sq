@@ -1,0 +1,16 @@
+CREATE TABLE DepositEntity (
+    id INTEGER NOT NULL PRIMARY KEY,
+    balance REAL NOT NULL,
+    currency TEXT NOT NULL,
+    status TEXT NOT NULL,
+    name TEXT NOT NULL
+);
+
+getAllDeposits:
+SELECT *
+FROM DepositEntity;
+
+insertDeposit:
+INSERT OR REPLACE
+INTO DepositEntity
+VALUES (?, ?, ?, ?, ?);

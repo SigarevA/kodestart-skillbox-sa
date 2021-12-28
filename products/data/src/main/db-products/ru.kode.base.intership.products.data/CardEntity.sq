@@ -1,0 +1,34 @@
+CREATE TABLE CardEntity (
+    id INTEGER NOT NULL PRIMARY KEY,
+    accountId INTEGER NOT NULL,
+    expiredAt INTEGER NOT NULL,
+    paymentSystem TEXT NOT NULL,
+    status TEXT NOT NULL,
+    name TEXT NOT NULL,
+    type TEXT NOT NULL,
+    number TEXT NOT NULL,
+    FOREIGN KEY (accountId) REFERENCES AccountEntity(id)
+);
+
+insertCard:
+INSERT OR REPLACE
+INTO CardEntity
+VALUES (?, ?, ?, ?, ?, ?, ?, ?);
+
+getCardByAccountId:
+SELECT *
+FROM CardEntity
+WHERE accountId = :id
+;
+
+getCardById:
+SELECT *
+FROM CardEntity
+WHERE id = :id
+;
+
+updateName:
+UPDATE CardEntity
+SET name =:newName
+WHERE id =:id
+;

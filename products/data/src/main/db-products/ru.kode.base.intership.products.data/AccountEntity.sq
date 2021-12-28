@@ -1,0 +1,22 @@
+CREATE TABLE AccountEntity (
+    id INTEGER NOT NULL PRIMARY KEY,
+    numberAccount TEXT NOT NULL,
+    balance REAL NOT NULL,
+    currency TEXT NOT NULL,
+    status TEXT NOT NULL
+);
+
+getAllAccount:
+SELECT *
+FROM AccountEntity;
+
+insertAccount:
+INSERT OR REPLACE
+INTO AccountEntity
+VALUES (?, ?, ?, ?, ?);
+
+updateBalance:
+UPDATE AccountEntity
+SET balance =:balance
+WHERE id =:id
+;

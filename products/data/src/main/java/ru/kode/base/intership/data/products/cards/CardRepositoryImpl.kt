@@ -1,38 +1,53 @@
 package ru.kode.base.intership.data.products.cards
 
+import com.squareup.sqldelight.runtime.coroutines.asFlow
+import com.squareup.sqldelight.runtime.coroutines.mapToOne
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import ru.kode.base.internship.domain.Card
 import ru.kode.base.internship.domain.card.repositories.DetailCardRepository
-import ru.kode.base.internship.products.domain.repositories.CardId
 import ru.kode.base.internship.products.domain.repositories.CardRepository
-import ru.kode.base.intership.data.products.FakeData
+import ru.kode.base.intership.data.di.ProductsDataModule.Companion.SIMPLE_DATE_CARD
+import ru.kode.base.intership.data.network.ProductsAPI
 import ru.kode.base.intership.data.products.mappers.toDomainCard
-
+import rukodebaseintershipproductsdata.CardEntityQueries
+import java.text.DateFormat
 import javax.inject.Inject
+import javax.inject.Named
 
-internal class CardRepositoryImpl @Inject constructor() : CardRepository, DetailCardRepository {
-  override fun cardDetails(id: CardId): Flow<Card> =
-    flow {
-      emit(FakeData.cards.find { it.id == id } ?: throw IllegalArgumentException())
-    }.map {
+internal class CardRepositoryImpl @Inject constructor(
+  private val productsAPI: ProductsAPI,
+  private val queries: CardEntityQueries,
+  @Named(SIMPLE_DATE_CARD) val dateFormat: DateFormat,
+) : CardRepository, DetailCardRepository {
+
+  override suspend fun cardDetails(id: Long, isRefresh: Boolean): Flow<Card> {
+    if (!isRefresh) {
+      val card = productsAPI.fetchDetailCard(id, "android-$id")
+      queries.insertCard(
+        card.id,
+        card.accountId,
+        dateFormat.parse(card.expiredAt)?.time ?: throw IllegalArgumentException(),
+        "Visa",
+        card.status,
+        card.name,
+        "physical",
+        card.name
+      )
+    }
+    return queries.getCardById(id).asFlow().mapToOne().map {
       it.toDomainCard()
     }
+  }
 
-  override fun getCardDetails(id: Long): Flow<Card> = flow {
-    emit(FakeData.cards.find { it.id == id } ?: throw IllegalArgumentException())
-  }.map {
-    it.toDomainCard()
+
+  override suspend fun getCardDetails(id: Long): Flow<Card> {
+    return queries.getCardById(id).asFlow().mapToOne().map {
+      it.toDomainCard()
+    }
   }
 
   override suspend fun updateCardName(cardId: Long, newName: String) {
-    FakeData.cards.forEachIndexed { i, card ->
-      if (card.id == cardId) {
-        FakeData.cards[i] = card.copy(name = newName)
-        return
-      }
-    }
-    throw IllegalArgumentException()
+    queries.updateName(newName, cardId)
   }
 }

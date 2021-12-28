@@ -35,7 +35,5 @@ internal object ProductsMainScreen {
     val expandBankAccounts: List<Boolean>,
   )
 
-  sealed class ErrorMessage {
-
-  }
+  sealed class ErrorMessage { }
 }

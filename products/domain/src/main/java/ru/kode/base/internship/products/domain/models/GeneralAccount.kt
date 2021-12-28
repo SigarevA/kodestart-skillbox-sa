@@ -6,5 +6,5 @@ data class GeneralAccount(
   val balance: Double,
   val currency: String,
   val status: String,
-  val cards: List<Long>
+  val cards: List<Long>,
 )
