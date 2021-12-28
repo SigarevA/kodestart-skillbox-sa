@@ -20,23 +20,20 @@ internal class AccountRepositoryImpl @Inject constructor(
 
   private val queries = db.accountEntityQueries
 
-  private val _accounts: MutableSharedFlow<List<GeneralAccount>> = MutableSharedFlow()
-  private val asd = queries.getAllAccount().asFlow()
-    .mapToList().map {
-      it.map {
-        GeneralAccount(
-          it.id,
-          it.numberAccount,
-          it.balance,
-          it.currency,
-          it.status,
-          db.cardInAccountQueries.getAllAccount(it.id, mapper = { _, cardId -> cardId }).executeAsList()
-        )
-      }
-    }
-
   override val accounts: Flow<List<GeneralAccount>>
-    get() = asd
+    get() = queries.getAllAccount().asFlow()
+      .mapToList().map {
+        it.map {
+          GeneralAccount(
+            it.id,
+            it.numberAccount,
+            it.balance,
+            it.currency,
+            it.status,
+            db.cardInAccountQueries.getAllAccount(it.id, mapper = { _, cardId -> cardId }).executeAsList()
+          )
+        }
+      }
 
   override suspend fun load(isRefresh: Boolean) {
     if (!isRefresh) {

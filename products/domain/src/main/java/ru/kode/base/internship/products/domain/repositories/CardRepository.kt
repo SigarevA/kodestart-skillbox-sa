@@ -6,5 +6,5 @@ import ru.kode.base.internship.domain.Card
 typealias CardId = Long
 
 interface CardRepository {
-  suspend fun cardDetails(id: Long, isRefresh : Boolean): Flow<Card>
+  fun cardDetails(id: CardId): Flow<Card>
 }

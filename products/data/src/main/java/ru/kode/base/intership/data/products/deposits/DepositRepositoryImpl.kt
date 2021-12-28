@@ -2,9 +2,11 @@ package ru.kode.base.intership.data.products.deposits
 
 import com.squareup.sqldelight.runtime.coroutines.asFlow
 import com.squareup.sqldelight.runtime.coroutines.mapToList
-import com.squareup.sqldelight.runtime.coroutines.mapToOne
+import com.squareup.sqldelight.runtime.coroutines.mapToOneOrNull
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onEach
 import ru.kode.base.internship.products.domain.models.DepositTerm
 import ru.kode.base.internship.products.domain.models.GeneralDeposit
 import ru.kode.base.internship.products.domain.repositories.DepositRepository
@@ -56,6 +58,26 @@ internal class DepositRepositoryImpl @Inject constructor(
     }
   }
 
+  override suspend fun getTerm(depositId: Long): Flow<DepositTerm> =
+    depositTermsQueries.getDepositTermByDepositID(depositId,
+      mapper = { _, close, rate -> DepositTerm(Date(close), rate.toFloat() + (Math.random() * 7.0f).toFloat()) }
+    )
+      .asFlow()
+      .mapToOneOrNull()
+      .onEach {
+        if (it == null) {
+          val term = productsAPI.fetchDepositTerms(depositId, "android-$depositId")
+          val date: Long = formatDate.parse(term.closeDate)?.time ?: throw IllegalStateException()
+          depositTermsQueries.insertDepositTerm(depositId,
+            date,
+            term.rate
+          )
+        }
+      }
+      .filter { it != null }
+      .map { it!! }
+
+  /*
   override suspend fun getTerm(depositId: Long, isRefresh: Boolean): Flow<DepositTerm> {
     if (!isRefresh) {
       val term = productsAPI.fetchDepositTerms(depositId, "android-$depositId")
@@ -69,4 +91,5 @@ internal class DepositRepositoryImpl @Inject constructor(
       .asFlow()
       .mapToOne()
   }
+   */
 }

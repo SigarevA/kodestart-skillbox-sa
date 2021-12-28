@@ -20,7 +20,7 @@ internal class InMemoryDatabaseDriverProvider @Inject constructor(
     return AndroidSqliteDriver(
       composeSqlDriverSchemes(ProductsDataBase.Schema),
       context,
-      name = "app-db"
+      name = null
     ).let { driver ->
       if (ENABLE_LOGGING) {
         LogSqliteDriver(driver) { log ->

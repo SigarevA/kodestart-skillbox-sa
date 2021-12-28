@@ -8,6 +8,7 @@ import ru.kode.base.core.coroutine.BasePresenter
 import ru.kode.base.internship.core.domain.entity.LceState
 import ru.kode.base.internship.products.domain.usecase.ProductsUseCase
 import ru.kode.base.internship.routing.AppFlow
+import timber.log.Timber
 import javax.inject.Inject
 
 internal class ProductsMainPresenter @Inject constructor(
@@ -78,6 +79,7 @@ internal class ProductsMainPresenter @Inject constructor(
 
     onEach(productsUseCase.accountState) {
       transitionTo { state, payload ->
+        Timber.d("accountState : $payload")
         if (payload.isComplete && state.isRefreshAccount)
           state.copy(bankAccountsLceState = payload, isRefreshAccount = false)
         else
@@ -87,6 +89,7 @@ internal class ProductsMainPresenter @Inject constructor(
 
     onEach(productsUseCase.depositState) {
       transitionTo { state, payload ->
+        Timber.d("depositState : $payload")
         if (payload.isComplete && state.isRefreshDeposit)
           state.copy(depositsLceState = payload, isRefreshDeposit = false)
         else
@@ -100,8 +103,8 @@ internal class ProductsMainPresenter @Inject constructor(
           state.copy(
             bankAccounts = ProductsMainScreen.BankAccountInfo(
               accounts, ArrayList<Boolean>().apply {
-                repeat(accounts.size) {
-                  add(false)
+                repeat(accounts.size) { i ->
+                  add(state.bankAccounts?.let { it.expandBankAccounts.size > i && it.expandBankAccounts[i] } ?: false)
                 }
               }
             ),
